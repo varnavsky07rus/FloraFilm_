@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">FloraFilm</string>
-    <string name="api_key_kinopoisk"        ></string>
-    <string name="api_key_vibix"            ></string>
-    <string name="api_key_hdvb"             ></string>
+    <string name="api_key_kinopoisk"></string>
+    <string name="api_key_vibix"></string>
+    <string name="api_key_hdvb"></string>
 
     <string name="settings_switchFullscreenMode_text">Открывать приложение во весь экран?\n(При отключении требуется перезагрузка приложения)</string>
     <string name="settings_switchVisibleFloatActionButtonMenu_text">Показывать плавающую кнопку на главном экране</string>

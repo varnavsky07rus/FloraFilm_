@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!--<uses-permission android:name="android.permission.INSTALL_PACKAGES"/>-->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
 
     <application
         android:allowBackup="true"
@@ -15,12 +17,12 @@
         android:theme="@style/Theme.FloraFilm"
         tools:targetApi="31">
         <activity
+            android:name=".ui.updateApp.UpdateActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.vk.LoginVkActivity"
             android:exported="true"
-            android:launchMode="singleTask">
-        </activity>
-
-
+            android:launchMode="singleTask" />
         <activity
             android:name=".ui.player.exo.ExoActivity"
             android:exported="false"
@@ -38,6 +40,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
     </application>
+
+
 
 </manifest>

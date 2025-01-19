@@ -5,6 +5,7 @@ import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Build;
@@ -39,8 +40,10 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.alaka_ala.florafilm.databinding.ActivityMainBinding;
+import com.alaka_ala.florafilm.sys.update_app.UpdateApp;
 import com.alaka_ala.florafilm.sys.utils.SettingsApp;
 import com.alaka_ala.florafilm.sys.utils.ViewClickable;
+import com.alaka_ala.florafilm.ui.updateApp.UpdateActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -68,7 +71,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(binding.getRoot().getId()), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
         getWindow().setFlags(
+                // Включает аппаратное ускорение
                 WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED, WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
         );
         settingsApp = new SettingsApp(this);
@@ -164,6 +174,31 @@ public class MainActivity extends AppCompatActivity {
         });
 
         updateStatusBarIconColor(this);
+
+        UpdateApp.findNewVersion(this, new UpdateApp.FindUpdateCallback() {
+            @Override
+            public void onUpdateAvailable(String newVersionCode, String description, String urlAPK, String urlMetadataJson) {
+                Snackbar.make(binding.getRoot(), "Доступно обновление", Snackbar.LENGTH_SHORT).setAction("Обновить", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(MainActivity.this, UpdateActivity.class);
+                        intent.putExtra("newVersionCode", newVersionCode);
+                        intent.putExtra("description", description);
+                        intent.putExtra("urlAPK", urlAPK);
+                        intent.putExtra("urlMetadataJson", urlMetadataJson);
+                        startActivity(intent);
+
+                    }
+                }).show();
+            }
+
+            @Override
+            public void onError(String error, String moreError) {
+                new MaterialAlertDialogBuilder(MainActivity.this).setTitle("Обновление").setMessage(error).show();
+            }
+        });
+
+
     }
 
     private void fullscreenAppMode(boolean fullScreen, boolean isManualEdit) {
@@ -277,7 +312,6 @@ public class MainActivity extends AppCompatActivity {
         void onVisibilityFloatActionButtonMenu(boolean visibility);
     }
 
-
     public static void setFullscreenAppMode(boolean fullScreen) {
         callbackFullscreenAppMode.onFullscreenAppMode(fullScreen);
     }
@@ -306,7 +340,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-
 
     @Override
     protected void onResume() {

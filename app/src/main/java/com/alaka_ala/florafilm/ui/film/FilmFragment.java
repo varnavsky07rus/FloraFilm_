@@ -348,6 +348,7 @@ public class FilmFragment extends Fragment implements KinopoiskAPI.RequestCallba
             }
         });
         rvActors.setLayoutManager(new GridLayoutManager(getContext(), 3, GridLayoutManager.HORIZONTAL, false));
+        if (getContext() == null) return;
         rvActors.setAdapter(new PersonsRecyclerAdapter(PersonsRecyclerAdapter.TYPE_HOLDER_MAIN_PERSON, listStaffItem, getLayoutInflater()));
     }
 
@@ -361,7 +362,7 @@ public class FilmFragment extends Fragment implements KinopoiskAPI.RequestCallba
     @Override
     public void finishParseFilm(Vibix.VibixFilm vibixFilm) {
         if (vibixFilm == null) return;
-
+        if (getContext() == null) return;
 
         LayoutInflater inflater = getLayoutInflater();
         View layout_film_files = inflater.inflate(R.layout.layout_film_files, null, false);
@@ -432,6 +433,7 @@ public class FilmFragment extends Fragment implements KinopoiskAPI.RequestCallba
     @SuppressLint("MissingInflatedId")
     @Override
     public void finishParseSerial(Vibix.VibixSerial vibixSerial) {
+        if (getContext() == null) return;
         LayoutInflater inflater = getLayoutInflater();
         View layout_film_files = inflater.inflate(R.layout.layout_film_files, null, false);
         LinearLayout linearLayoutTitleFiles = layout_film_files.findViewById(R.id.linearLayoutTitleFiles);
@@ -502,6 +504,7 @@ public class FilmFragment extends Fragment implements KinopoiskAPI.RequestCallba
                 }
             }).show();
         } else {
+            if (getContext() == null) return;
             LayoutInflater inflater = getLayoutInflater();
             View layout_film_files = inflater.inflate(R.layout.layout_film_files, null, false);
             LinearLayout linearLayoutTitleFiles = layout_film_files.findViewById(R.id.linearLayoutTitleFiles);
