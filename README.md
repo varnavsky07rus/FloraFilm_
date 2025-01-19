@@ -4,7 +4,7 @@
 необходимо добавить ключи API следуюущих сервисов в файл string.xml`
 - [VIBIX](https://Vibix.org)
 - [kinopoisk](https://kinopoiskapiunofficial.tech)
-- [HDVB](https://hdvb.org/)
+- [HDVB](https://hdvb.org/user/)
 
 ## Файл string.xml
 - [string.xml](app/src/main/res/values/strings.xml)
