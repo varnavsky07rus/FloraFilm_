@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_navigation"
+    app:startDestination="@id/homePageFragment">
+
+    <fragment
+        android:id="@+id/homePageFragment"
+        android:name="com.alaka_ala.florafilm.ui.home.HomePageFragment"
+        android:label="Главная"
+        tools:layout="@layout/fragment_home_page" />
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="com.alaka_ala.florafilm.ui.search.SearchFragment"
+        android:label="Поиск"
+        tools:layout="@layout/fragment_search" />
+    <fragment
+        android:id="@+id/favoriteFragment"
+        android:name="com.alaka_ala.florafilm.ui.favorite.FavoriteFragment"
+        android:label="Избранное"
+        tools:layout="@layout/fragment_favorite" />
+    <fragment
+        android:id="@+id/settingsAppFragment"
+        android:name="com.alaka_ala.florafilm.ui.settings.SettingsAppFragment"
+        android:label="Настройки"
+        tools:layout="@layout/fragment_settings_app" />
+    <fragment
+        android:id="@+id/viewedFragment"
+        android:name="com.alaka_ala.florafilm.ui.viewed.ViewedFragment"
+        android:label="Просмотренные"
+        tools:layout="@layout/fragment_viewed" />
+    <fragment
+        android:id="@+id/categoryListFilmFragment"
+        android:name="com.alaka_ala.florafilm.ui.categories.CategoryListFilmFragment"
+        tools:layout="@layout/fragment_category_list_film" />
+    <fragment
+        android:id="@+id/filmFragment"
+        android:name="com.alaka_ala.florafilm.ui.film.FilmFragment"
+        android:label="Просмотр" />
+</navigation>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Example Player</title>
+    <style>
+        html, body {
+    height: 100%; /* Занимаем всю высоту экрана */
+    width: 100%;  /* Занимаем всю ширину экрана */
+    margin: 0;
+    padding: 0; /* Убираем отступы и padding */
+    overflow: auto;
+}
+
+#player {
+    height: 100%; /* Занимаем всю высоту родителя (body) */
+    width: 100%;  /* Занимаем всю ширину родителя (body) */
+    margin: 0;
+    padding: 0; /* Убираем отступы и padding */
+    position: relative;
+}
+    </style>
+    <script src="playerjs.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="player"></div>
+
+<script>
+    // Функция для получения параметров из URL
+    function getQueryParam(param) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(param);
+    }
+
+    const fileParam = getQueryParam('file');
+    const poster = getQueryParam('poster');
+    const isAutoPlay = getQueryParam('play');
+    if (fileParam) {
+      //var src = decodeURI(fileParam);
+      var player = new Playerjs({id: "player", file: fileParam, poster: poster, autoplay: isAutoPlay});
+    } else {
+      document.getElementById('player').innerText = "Параметр 'file' отсутствует в запросе.";
+    }
+</script>
+
+</body>
+</html>

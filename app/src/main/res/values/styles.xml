@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+
+    <style name="SwitchMyTheme" parent="Widget.Material3.CompoundButton.MaterialSwitch">
+        <item name="thumbTint">@color/thumbTint</item>
+        <item name="trackTint">@color/trackTint</item>
+    </style>
+
+
+
+</resources>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chipGroup"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:singleLine="false">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/genre19"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cемейныe" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/genre18"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Мультфильмы" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/genre17"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ужасы" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/genre14"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Военные" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/genre13"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Комедии" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/genre12"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Фэнтези" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/genre11"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Боевик" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/genre10"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Вестерн" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/genre7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Приключения" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/genre24"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Аниме" />
+    </com.google.android.material.chip.ChipGroup>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

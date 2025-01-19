@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/open_film"
+        android:icon="@drawable/baseline_last_page_24"
+        android:title="Открыть страницу фильма"
+        app:icon="@drawable/baseline_last_page_24" />
+    <item
+        android:id="@+id/view_trailer"
+        android:icon="@drawable/rounded_play_circle_24"
+        android:title="Смотреть трейлер" />
+
+
+    <item
+        android:id="@+id/add_to_favorite"
+        android:icon="@drawable/rounded_bookmark_24"
+        android:title="Добавить в избранное" />
+    <item
+        android:id="@+id/remove_is_forever"
+        android:icon="@drawable/rounded_delete_24"
+        android:title="Удалить из избранных" />
+    <item
+        android:id="@+id/add_to_view"
+        android:icon="@drawable/round_remove_red_eye_24"
+        android:title="Смотрел" />
+    <item
+        android:id="@+id/remove_is_view"
+        android:icon="@drawable/rounded_delete_24"
+        android:title="Удалить из просмотренных" />
+    <item
+        android:id="@+id/search_similar"
+        android:icon="@drawable/rounded_globe_24"
+        android:title="Найти похожие" />
+</menu>

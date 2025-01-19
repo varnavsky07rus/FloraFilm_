@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FAFFFF</color>
+
+    <!-- Цвета темы MaterialSwitch в Settings-->
+    <color name="thumbTint">#E6E6E6</color>
+    <color name="trackTint">#2B2A2E</color>
+    <color name="floatActionButton">@color/thumbTint</color>
+    <!--########################## -->
+    <color name="red">#FF2B2B</color>
+
+    <color name="hintNight">#161616</color>
+    <color name="hintDay">#E4E0DB</color>
+
+
+
+</resources>
