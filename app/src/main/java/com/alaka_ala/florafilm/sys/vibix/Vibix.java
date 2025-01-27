@@ -7,6 +7,7 @@ import android.os.Message;
 
 import androidx.annotation.NonNull;
 
+import com.alaka_ala.florafilm.ui.player.exo.models.EPData;
 import com.google.gson.JsonParser;
 
 import org.json.JSONArray;
@@ -46,13 +47,13 @@ public class Vibix {
     }
 
     public interface ConnectionVibix {
-        void startParse();
+        void startParseVibix();
 
-        void finishParseFilm(VibixFilm vibixFilm);
+        void finishParseFilmVibix(EPData.Film vibixFilm);
 
-        void finishParseSerial(VibixSerial vibixSerial);
+        void finishParseSerialVibix(EPData.Serial vibixSerial);
 
-        void errorParse(IOException e);
+        void errorParseVibix(IOException e);
     }
 
     private ConnectionVibix connectionVibix;
@@ -71,7 +72,7 @@ public class Vibix {
                 if (bundle.getBoolean("ok")) {
                     String responseBody = bundle.getString("responseBody", "");
                     if (responseBody.isEmpty()) {
-                        connectionVibix.errorParse(new IOException("Пустой ответ от сервера"));
+                        connectionVibix.errorParseVibix(new IOException("Пустой ответ от сервера"));
                     } else {
                         if (JsonParser.parseString(responseBody).isJsonObject()) {
                             try {
@@ -91,7 +92,7 @@ public class Vibix {
 
 
                 } else {
-                    connectionVibix.errorParse(new IOException(bundle.getString("error")));
+                    connectionVibix.errorParseVibix(new IOException(bundle.getString("error")));
                 }
                 return false;
             }
@@ -105,7 +106,7 @@ public class Vibix {
         }
         requestBuilder.url(urlStr);
         Request request = requestBuilder.build();
-        connectionVibix.startParse();
+        connectionVibix.startParseVibix();
         okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -154,14 +155,14 @@ public class Vibix {
                 if (!ok) return false;
                 String typeContent = bundle.getString("type", "");
                 if (typeContent.isEmpty()) {
-                    connectionVibix.errorParse(new IOException("Пустой тип контента при парсинге"));
+                    connectionVibix.errorParseVibix(new IOException("Пустой тип контента при парсинге"));
                 }
                 if (typeContent.equals(TYPE_CONTENT_SERIAL)) {
-                    VibixSerial vibixSerial = (VibixSerial) bundle.getSerializable("data");
-                    connectionVibix.finishParseSerial(vibixSerial);
+                    EPData.Serial vibixSerial = (EPData.Serial) bundle.getSerializable("data");
+                    connectionVibix.finishParseSerialVibix(vibixSerial);
                 } else {
-                    VibixFilm vibixFilm = (VibixFilm) bundle.getSerializable("data");
-                    connectionVibix.finishParseFilm(vibixFilm);
+                    EPData.Film vibixFilm = (EPData.Film) bundle.getSerializable("data");
+                    connectionVibix.finishParseFilmVibix(vibixFilm);
                 }
                 return false;
             }
@@ -223,18 +224,18 @@ public class Vibix {
     }
 
     private void createSerial(Handler handler, @NonNull JSONArray jsonArray) throws JSONException {
-        VibixSerial vibixSerial;
-        ArrayList<VibixSerial.Season> seasons = new ArrayList<>();
+        EPData.Serial vibixSerial;
+        ArrayList<EPData.Serial.Season> seasons = new ArrayList<>();
 
         for (int seasonIndex = 0; seasonIndex < jsonArray.length(); seasonIndex++) {
-            ArrayList<VibixSerial.Episode> episodes = new ArrayList<>();
+            ArrayList<EPData.Serial.Episode> episodes = new ArrayList<>();
 
             JSONObject seasonJsonObj = jsonArray.getJSONObject(seasonIndex);
             String seasonTitle = seasonJsonObj.getString("title");
             JSONArray episodesJarray = seasonJsonObj.getJSONArray("folder");
             int countEpisodes = episodesJarray.length();
             for (int episodeIndex = 0; episodeIndex < countEpisodes; episodeIndex++) {
-                ArrayList<VibixSerial.Translations> translations = new ArrayList<>();
+                ArrayList<EPData.Serial.Translations> translations = new ArrayList<>();
 
                 JSONObject episodeJsonObj = episodesJarray.getJSONObject(episodeIndex);
                 String episodeTitle = episodeJsonObj.getString("title");
@@ -257,24 +258,24 @@ public class Vibix {
                         }
                     }
 
-                    VibixSerial.Translations.Builder builderTranslations = new VibixSerial.Translations.Builder();
+                    EPData.Serial.Translations.Builder builderTranslations = new EPData.Serial.Translations.Builder();
                     builderTranslations.setTitle(translationTitle);
                     builderTranslations.setVideoData(videoData);
                     translations.add(builderTranslations.build());
                 }
 
-                VibixSerial.Episode.Builder builderEpisode = new VibixSerial.Episode.Builder();
+                EPData.Serial.Episode.Builder builderEpisode = new EPData.Serial.Episode.Builder();
                 builderEpisode.setTitle(episodeTitle);
                 builderEpisode.setTranslations(translations);
                 episodes.add(builderEpisode.build());
 
             }
-            VibixSerial.Season.Builder builderSeason = new VibixSerial.Season.Builder();
+            EPData.Serial.Season.Builder builderSeason = new EPData.Serial.Season.Builder();
             builderSeason.setTitle(seasonTitle);
             builderSeason.setEpisodes(episodes);
             seasons.add(builderSeason.build());
         }
-        VibixSerial.Builder builder = new VibixSerial.Builder();
+        EPData.Serial.Builder builder = new EPData.Serial.Builder();
         builder.setSeasons(seasons);
         vibixSerial = builder.build();
 
@@ -301,7 +302,7 @@ public class Vibix {
             String id = jsonObject.getString("id");
             String poster = jsonObject.getString("poster");
             JSONArray translations = jsonObject.getJSONArray("file");
-            ArrayList<VibixFilm.Translations> translationsList = new ArrayList<>();
+            ArrayList<EPData.Film.Translations> translationsList = new ArrayList<>();
 
             for (int translationIndex = 0; translationIndex < translations.length(); translationIndex++) {
                 JSONObject translation = translations.getJSONObject(translationIndex);
@@ -317,17 +318,17 @@ public class Vibix {
                         videoData.add(new AbstractMap.SimpleEntry<>(quality, url));
                     }
                 }
-                VibixFilm.Translations.Builder builderTranslations = new VibixFilm.Translations.Builder();
+                EPData.Film.Translations.Builder builderTranslations = new EPData.Film.Translations.Builder();
                 builderTranslations.setTitle(title);
                 builderTranslations.setVideoData(videoData);
                 translationsList.add(builderTranslations.build());
             }
 
-            VibixFilm.Builder vibixFilmBuilder = new VibixFilm.Builder();
+            EPData.Film.Builder vibixFilmBuilder = new EPData.Film.Builder();
             vibixFilmBuilder.setId(id);
             vibixFilmBuilder.setPoster(poster);
             vibixFilmBuilder.setTranslations(translationsList);
-            VibixFilm vibixFilm = vibixFilmBuilder.build();
+            EPData.Film vibixFilm = vibixFilmBuilder.build();
 
             Bundle bundle = new Bundle();
             bundle.putBoolean("ok", true);
@@ -367,222 +368,7 @@ public class Vibix {
     }
 
 
-    public static class VibixFilm implements Serializable {
-        private String id = "null";
-        private String poster = "null";
-        private ArrayList<Translations> translations;
 
-
-        public ArrayList<Translations> getTranslations() {
-            return translations;
-        }
-
-        public String getPoster() {
-            return poster;
-        }
-
-        public String getId() {
-            return id;
-        }
-
-
-        public VibixFilm(Builder builder) {
-            this.id = builder.id;
-            this.poster = builder.poster;
-            this.translations = builder.translations;
-        }
-
-
-        public static class Translations implements Serializable {
-            private final String title;
-            private final List<Map.Entry<String, String>> videoData;
-
-            public String getTitle(){
-                return title;
-            }
-            public List<Map.Entry<String, String>> getVideoData() {
-                return videoData;
-            }
-
-            public Translations(Builder builder) {
-                this.title = builder.title;
-                this.videoData = builder.videoData;
-            }
-
-            public static class Builder {
-                private String title;
-                private List<Map.Entry<String, String>> videoData;
-                public void  setTitle(String title) {
-                    this.title = title;
-                }
-                public Translations.Builder setVideoData(List<Map.Entry<String, String>> videoData) {
-                    this.videoData = videoData;
-                    return this;
-                }
-                public Translations build(){
-                    return new VibixFilm.Translations(this);
-                }
-            }
-
-
-        }
-
-
-        public static class Builder {
-            private String id;
-            private String poster;
-            private ArrayList<Translations> translations;
-
-            public Builder setId(String id) {
-                this.id = id;
-                return this;
-            }
-
-            public Builder setPoster(String poster) {
-                this.poster = poster;
-                return this;
-            }
-
-            public Builder setTranslations(ArrayList<Translations> translations) {
-                this.translations = translations;
-                return this;
-            }
-
-            public VibixFilm build() {
-                return new VibixFilm(this);
-            }
-        }
-
-    }
-
-    public static class VibixSerial implements Serializable {
-
-        private final ArrayList<Season> seasons;
-
-        public ArrayList<Season> getSeasons() {
-            return seasons;
-        }
-
-        public VibixSerial(Builder builder) {
-            this.seasons = builder.seasons;
-        }
-
-        public static class Builder {
-            private ArrayList<Season> seasons;
-
-            public Builder setSeasons(ArrayList<Season> seasons) {
-                this.seasons = seasons;
-                return this;
-            }
-            public VibixSerial build() {
-                return new VibixSerial(this);
-            }
-        }
-
-        public static class Season implements Serializable {
-            private final String title;
-            private final ArrayList<Episode> episodes;
-
-            public Season(Builder builder) {
-                this.title = builder.title;
-                this.episodes = builder.episodes;
-            }
-
-            public ArrayList<Episode> getEpisodes() {
-                return episodes;
-            }
-            public String getTitle() {
-                return title;
-            }
-
-            public static class Builder {
-                private String title;
-                private ArrayList<Episode> episodes;
-                public Builder setTitle(String title) {
-                    this.title = title;
-                    return this;
-                }
-                public Builder setEpisodes(ArrayList<Episode> episodes) {
-                    this.episodes = episodes;
-                    return this;
-                }
-                public Season build() {
-                    return new Season(this);
-                }
-            }
-
-
-        }
-
-        public static class Episode implements Serializable {
-            private final String title;
-            private final ArrayList<Translations> translations;
-
-            public Episode(Builder builder) {
-                this.title = builder.title;
-                this.translations = builder.translations;
-            }
-            public String getTitle() {
-                return title;
-            }
-            public ArrayList<Translations> getTranslations() {
-                return translations;
-            }
-            public static class Builder {
-                private String title;
-                private ArrayList<Translations> translations;
-                public Builder setTitle(String title) {
-                    this.title = title;
-                    return this;
-                }
-                public Builder setTranslations(ArrayList<Translations> translations) {
-                    this.translations = translations;
-                    return this;
-                }
-                public Episode build() {
-                    return new Episode(this);
-                }
-            }
-
-        }
-
-        public static class Translations implements Serializable {
-            private final String title;
-            private final List<Map.Entry<String, String>> videoData;
-
-            public String getTitle(){
-                return title;
-            }
-
-            public List<Map.Entry<String, String>> getVideoData() {
-                return videoData;
-            }
-
-            public Translations(Builder builder) {
-                this.title = builder.title;
-                this.videoData = builder.videoData;
-            }
-
-            public static class Builder {
-                private String title;
-                private List<Map.Entry<String, String>> videoData;
-                public void  setTitle(String title) {
-                    this.title = title;
-                }
-                public Builder setVideoData(List<Map.Entry<String, String>> videoData) {
-                    this.videoData = videoData;
-                    return this;
-                }
-                public Translations build(){
-                    return new Translations(this);
-                }
-            }
-
-
-        }
-
-
-    }
 
 
 }

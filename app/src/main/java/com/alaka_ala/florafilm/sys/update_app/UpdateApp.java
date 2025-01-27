@@ -10,131 +10,111 @@ import android.os.Message;
 import androidx.annotation.NonNull;
 
 import com.alaka_ala.florafilm.sys.AsyncThreadBuilder;
+import com.google.gson.JsonParser;
 
 import org.apache.commons.io.FileUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 public class UpdateApp {
-    private static final String baseURL = "https://github.com/varnavsky07rus/FloraFilm_";
-    private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 YaBrowser/24.1";
+    public static final String baseUrlAPK = "https://github.com/varnavsky07rus/FloraFilm_/raw/refs/heads/master/app/release/app-release.apk";
+    public static final String output_metadata_json = "https://raw.githubusercontent.com/varnavsky07rus/FloraFilm_/refs/heads/master/app/release/output-metadata.json";
 
 
-    public static void findNewVersion(Context context, FindUpdateCallback fuc) {
+    public static void findUpdate(Context context, FindUpdateCallback finderCb) {
+        final String ERROR = "ERROR";
+        final String SUCCESS = "SUCCESS";
+
         Handler handler = new Handler(new Handler.Callback() {
             @Override
             public boolean handleMessage(@NonNull Message msg) {
-                Bundle bundle = msg.getData();
-                String error = bundle.getString("error", "");
-                String moreError = bundle.getString("moreError", "");
-                if (!error.isEmpty()) {
-                    fuc.onError(error, moreError);
-                    return false;
+                if (msg.getData().getString("status").equals(SUCCESS)) {
+                    finderCb.onUpdateDetect(msg.getData().getString("urlApk"), msg.getData().getString("versionName"), msg.getData().getInt("versionCode"), getCurrentAppVersionCode(context));
+                } else if (msg.getData().getString("status").equals(ERROR)) {
+                    finderCb.findError(msg.getData().getString("error"));
                 }
-                String newVersionCode = bundle.getString("newVersionCode", "");
-                String description = bundle.getString("description", "");
-                String urlAPK = bundle.getString("urlAPK", "");
-                String urlOutput_metadata_json = bundle.getString("urlOutput_metadata_json", "");
-                if (!newVersionCode.isEmpty()) {
-                    fuc.onUpdateAvailable(newVersionCode, description, urlAPK, urlOutput_metadata_json);
-                } else {
-                    fuc.onNoUpdateAvailable();
-                }
-                return true;
+                return false;
             }
         });
-
-
-        Thread thread = new Thread(new Runnable() {
+        OkHttpClient okHttpClient = new OkHttpClient();
+        Request.Builder builder = new Request.Builder();
+        builder.url(output_metadata_json);
+        okHttpClient.newCall(builder.build()).enqueue(new Callback() {
             @Override
-            public void run() {
-                try {
-                    Document page = Jsoup.connect(baseURL).header("User-Agent", USER_AGENT).get();
-                    Elements elements = page.getElementsByClass("css-truncate css-truncate-target text-bold mr-2");
-                    String version = elements.get(0).text();
-                    if (version.startsWith("v")) {
-                        String appVersion = getAppVersion(context);
-                        if (!appVersion.isEmpty()) {
-                            if (!appVersion.equals(version)) {
-                                // Доступно обновление
-                                String url = "https://github.com/varnavsky07rus/FloraFilm_/releases/tag/" + version;
-                                page = Jsoup.connect(url).header("User-Agent", USER_AGENT).get();
-                                elements = page.getElementsByClass("markdown-body my-3");
+            public void onFailure(Call call, IOException e) {
+                Bundle bundle = new Bundle();
+                bundle.putString("status", ERROR);
+                bundle.putString("error", e.getMessage());
+                Message msg = new Message();
+                msg.setData(bundle);
+                handler.sendMessage(msg);
+                e.printStackTrace();
+            }
 
-                                String description = elements.get(0).text();
-                                String urlAPK = "https://github.com/varnavsky07rus/FloraFilm_/releases/download/" + version + "/app-release.apk";
-                                String urlOutput_metadata_json = "https://github.com/varnavsky07rus/FloraFilm_/releases/download/" + version + "/output_metadata.json";
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String json = response.body().string();
+                if (response.isSuccessful()) {
+                    if (JsonParser.parseString(json).isJsonObject()) {
+                        try {
+                            JSONObject jsonBody = new JSONObject(json);
+                            JSONArray elements = jsonBody.getJSONArray("elements");
+                            JSONObject element = elements.getJSONObject(0);
+                            int versionCode = element.getInt("versionCode");        // 1
+                            String versionName = element.getString("versionName");  // 1.0.0
+                            String variantName = jsonBody.getString("variantName"); // release/debug
 
+                            if (getCurrentAppVersionCode(context) < versionCode) {
                                 Bundle bundle = new Bundle();
-                                bundle.putString("error", "");
-                                bundle.putString("moreError", "");
-                                bundle.putString("newVersionCode", version);
-                                bundle.putString("description", description);
-                                bundle.putString("urlAPK", urlAPK);
-                                bundle.putString("urlOutput_metadata_json", urlOutput_metadata_json);
+                                bundle.putString("status", SUCCESS);
+                                bundle.putString("urlApk", baseUrlAPK);
+                                bundle.putInt("versionCode", versionCode);
+                                bundle.putString("variantName", variantName);
+                                bundle.putString("versionName", versionName);
                                 Message msg = new Message();
                                 msg.setData(bundle);
                                 handler.sendMessage(msg);
                             } else {
-                                // Нет обновления
                                 Bundle bundle = new Bundle();
-                                bundle.putString("error", "");
-                                bundle.putString("moreError", "");
-                                bundle.putString("newVersionCode", "");
-                                bundle.putString("description", "");
-                                bundle.putString("urlAPK", "");
-                                bundle.putString("urlOutput_metadata_json", "");
+                                bundle.putString("status", ERROR);
+                                bundle.putString("error", "Нет новых обновлений");
                                 Message msg = new Message();
                                 msg.setData(bundle);
                                 handler.sendMessage(msg);
                             }
+
+
+                        } catch (JSONException e) {
+                            onFailure(call, new IOException("Ошибка создания/парсинга JSONObject | [metadata_json]"));
                         }
-
                     }
-
-
-                } catch (IOException e) {
-                    // Нет обновления
-                    Bundle bundle = new Bundle();
-                    bundle.putString("error", "Ошибка поиска обновлений");
-                    bundle.putString("moreError", e.getMessage());
-                    bundle.putString("newVersionCode", "");
-                    bundle.putString("description", "");
-                    bundle.putString("urlAPK", "");
-                    bundle.putString("urlOutput_metadata_json", "");
-                    Message msg = new Message();
-                    msg.setData(bundle);
-                    handler.sendMessage(msg);
+                } else {
+                    onFailure(call, new IOException("Ошибка поиска обновлений | [metadata_json]"));
                 }
             }
         });
-        thread.start();
-
-
     }
-
     public interface FindUpdateCallback {
-        void onUpdateAvailable(String newVersionCode, String description, String urlAPK, String urlMetadataJson);
-
-        void onError(String error, String moreError);
-
-        default void onNoUpdateAvailable() {
-        }
-
-        ;
+        void onUpdateDetect(String urlApk, String newVersionName, int newVersionCode, int currentVersionCode);
+        void findError(String error);
     }
 
-    public static String getAppVersion(Context context) {
+    public static String getCurrentAppVersionName(Context context) {
         try {
             PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
             return packageInfo.versionName;
@@ -143,6 +123,18 @@ public class UpdateApp {
             return "";
         }
     }
+
+    public static int getCurrentAppVersionCode(Context context) {
+        int versionCode = 0; // Инициализируем versionCode значением по умолчанию
+        try {
+            PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            versionCode = packageInfo.versionCode; // Получаем versionCode
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return versionCode;
+    }
+
 
     public static void downloadUpdate(Context context, String urlAPK, UpdateCallbackDownload ucd) {
         // Создаем path для файла

@@ -37,5 +37,16 @@
     <fragment
         android:id="@+id/filmFragment"
         android:name="com.alaka_ala.florafilm.ui.film.FilmFragment"
-        android:label="Просмотр" />
+        android:label="Просмотр" >
+        <action
+            android:id="@+id/action_filmFragment_to_VKCommentsFragment"
+            app:destination="@id/VKCommentsFragment"
+            app:launchSingleTop="false"
+            app:popUpTo="@id/filmFragment"
+            app:popUpToInclusive="false" />
+    </fragment>
+    <fragment
+        android:id="@+id/VKCommentsFragment"
+        android:name="com.alaka_ala.florafilm.ui.vk.ui.comments.VKCommentsFragment"
+        android:label="Комментарии" />
 </navigation>

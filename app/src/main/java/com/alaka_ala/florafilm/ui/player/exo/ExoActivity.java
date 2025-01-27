@@ -2,7 +2,6 @@ package com.alaka_ala.florafilm.ui.player.exo;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.util.SparseArray;
 import android.view.WindowManager;
 
 import androidx.activity.EdgeToEdge;
@@ -15,15 +14,15 @@ import androidx.core.view.WindowInsetsCompat;
 import com.alaka_ala.florafilm.R;
 import com.alaka_ala.florafilm.databinding.ActivityExoBinding;
 import com.alaka_ala.florafilm.sys.vibix.Vibix;
+import com.alaka_ala.florafilm.ui.player.exo.models.EPData;
+import com.alaka_ala.florafilm.ui.vk.LoginVkActivity;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.source.DefaultMediaSourceFactory;
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
-
-import at.huber.youtubeExtractor.VideoMeta;
-import at.huber.youtubeExtractor.YouTubeExtractor;
-import at.huber.youtubeExtractor.YtFile;
 
 
 public class ExoActivity extends AppCompatActivity {
@@ -31,14 +30,15 @@ public class ExoActivity extends AppCompatActivity {
 
     private ExoPlayer player;
 
-    private Vibix.VibixFilm film;
-    private Vibix.VibixSerial serial;
+    private EPData.Film film;
+    private EPData.Serial serial;
     private String qualityTitle = "AUTO";
     private int indexQuality = -1;
     private int indexSeason = -1;
     private int indexEpisode = -1;
     private int indexTranslation = -1;
     private String TYPE_CONTENT = "NO_TYPE";
+    private String BALANCER = "Не определен";
 
     @SuppressLint("StaticFieldLeak")
     @Override
@@ -68,14 +68,11 @@ public class ExoActivity extends AppCompatActivity {
             initializePlayer(currentUrls);
         }
 
-
-
-
-
     }
 
     private @NonNull ArrayList<String> getEpisodes() {
         ArrayList<String> currentUrls = new ArrayList<>();
+
         for (int i = 0; i < serial.getSeasons().get(indexSeason).getEpisodes().size(); i++) {
             // парсим все серии выбранного сезона
             String currentUrl = serial.getSeasons().get(indexSeason).getEpisodes().get(i).getTranslations().get(indexTranslation).getVideoData().get(indexQuality).getValue();
@@ -85,7 +82,15 @@ public class ExoActivity extends AppCompatActivity {
     }
 
     private void  preparePlayer() {
-        player = new ExoPlayer.Builder(this).build();
+
+        // Создаем экземпляр DefaultHttpDataSource.Factory
+        DefaultHttpDataSource.Factory httpDataSourceFactory = new DefaultHttpDataSource.Factory();
+        // Создаем RequestProperties и устанавливаем User-Agent
+        DefaultHttpDataSource.RequestProperties requestProperties = new DefaultHttpDataSource.RequestProperties();
+        requestProperties.set("User-Agent", LoginVkActivity.USER_AGENT_KATE); // Замените на ваш User-Agent
+        // Устанавливаем RequestProperties в httpDataSourceFactory
+        httpDataSourceFactory.setDefaultRequestProperties(requestProperties.getSnapshot());
+        player = new ExoPlayer.Builder(this).setMediaSourceFactory(new DefaultMediaSourceFactory(httpDataSourceFactory)).build();
         binding.playerView.setPlayer(player);
     }
 
@@ -96,8 +101,11 @@ public class ExoActivity extends AppCompatActivity {
         if (player == null) {
             preparePlayer();
         }
+
+
         MediaItem mediaItem = MediaItem.fromUri(videoUrl);
         player.setMediaItem(mediaItem);
+
         player.prepare();
         player.play();
     }
@@ -119,20 +127,18 @@ public class ExoActivity extends AppCompatActivity {
         player.play();
     }
 
-
-
     private void getExtras() {
-        film = (Vibix.VibixFilm) getIntent().getSerializableExtra("film");
-        serial = (Vibix.VibixSerial) getIntent().getSerializableExtra("serial");
+        film = (EPData.Film) getIntent().getSerializableExtra("film");
+        serial = (EPData.Serial) getIntent().getSerializableExtra("serial");
         qualityTitle = getIntent().getStringExtra("titleQuality");
         indexQuality = getIntent().getIntExtra("indexQuality", 0);
         indexSeason = getIntent().getIntExtra("indexSeason", 0);
         indexEpisode = getIntent().getIntExtra("indexEpisode", 0);
         indexTranslation = getIntent().getIntExtra("indexTranslation", 0);
-        detectTypeContent();
+        defineTypeContent();
     }
 
-    private void detectTypeContent() {
+    private void defineTypeContent() {
         if (film != null) {
             TYPE_CONTENT = "FILM";
         } else if (serial != null) {

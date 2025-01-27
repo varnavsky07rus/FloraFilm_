@@ -126,7 +126,7 @@ public class KinopoiskAPI {
          * Данный метод будет вызываться столько раз, сколько будет вызвано новых запросов.
          * Так же будет вызываться onFailure() на каждый новый запрос
          */
-        void finishInfoItem();
+        default void finishInfoItem(){};
     }
 
     public interface RequestCallbackStaffList {

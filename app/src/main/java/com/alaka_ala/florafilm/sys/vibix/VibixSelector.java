@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import com.alaka_ala.florafilm.R;
 import com.alaka_ala.florafilm.ui.player.exo.ExoActivity;
+import com.alaka_ala.florafilm.ui.player.exo.models.EPData;
 import com.alaka_ala.florafilm.ui.player.web.PlayerWebActivity;
 import com.alaka_ala.florafilm.ui.utils_ui.AlertDialogTrailerView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -31,27 +32,27 @@ public class VibixSelector {
     }
 
     private final LinearLayout  root;
-    private Vibix.VibixFilm film = null;
-    private Vibix.VibixSerial serial = null;
+    private EPData.Film film = null;
+    private EPData.Serial serial = null;
     private final String CURRENT_TYPE_CONTENT;
 
-    public VibixSelector(LinearLayout root, Vibix.VibixFilm film) {
+    public VibixSelector(LinearLayout root, EPData.Film film) {
         CURRENT_TYPE_CONTENT = "FILM";
         this.root = root;
         this.film = film;
     }
 
-    public VibixSelector(LinearLayout root, Vibix.VibixSerial serial) {
+    public VibixSelector(LinearLayout root, EPData.Serial serial) {
         CURRENT_TYPE_CONTENT = "SERIAL";
         this.root = root;
         this.serial = serial;
     }
 
-    public Vibix.VibixFilm getFilm() {
+    public EPData.Film getFilm() {
         return film;
     }
 
-    public Vibix.VibixSerial getSerial() {
+    public EPData.Serial getSerial() {
         return serial;
     }
 

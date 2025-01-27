@@ -43,13 +43,6 @@
                 tools:text="MP4 1080p" />
         </LinearLayout>
 
-        <View
-            android:id="@+id/divider4"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="?android:attr/listDivider"
-            android:visibility="gone" />
-
         <LinearLayout
             android:id="@+id/linearLayoutFaF"
             android:layout_width="match_parent"

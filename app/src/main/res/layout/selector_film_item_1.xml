@@ -43,13 +43,6 @@
                 tools:text="Профессиональный дублированный" />
         </LinearLayout>
 
-        <View
-            android:id="@+id/divider4"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="?android:attr/listDivider"
-            android:visibility="gone" />
-
         <LinearLayout
             android:id="@+id/linearLayoutFf"
             android:layout_width="match_parent"

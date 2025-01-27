@@ -32,15 +32,22 @@
                         android:id="@+id/textView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="24dp"
+                        android:layout_marginBottom="8dp"
                         android:text="ВКонтакте"
                         android:textSize="24sp" />
+
+                    <View
+                        android:id="@+id/divider6"
+                        android:layout_width="match_parent"
+                        android:layout_height="1px"
+                        android:background="?android:attr/listDivider" />
 
                     <androidx.cardview.widget.CardView
                         android:id="@+id/cardViewAccountVk"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="0dp"
+                        android:layout_marginTop="8dp"
                         android:layout_marginEnd="0dp"
                         android:layout_marginBottom="24dp"
                         android:clickable="true"
@@ -153,110 +160,183 @@
                         android:layout_marginBottom="8dp"
                         android:background="?android:attr/listDivider" />
 
-                    <LinearLayout
+                    <FrameLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal">
+                        android:layout_height="match_parent">
 
-                        <ImageView
-                            android:id="@+id/imageView2"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="center"
-                            android:layout_marginEnd="24dp"
-                            android:layout_weight="0"
-                            android:src="@drawable/baseline_menu_24"
-                            android:tint="?attr/SettingsIconTintTheme" />
-
-                        <com.google.android.material.materialswitch.MaterialSwitch
-                            android:id="@+id/switchVisibleFloatActionButtonMenu"
-                            style="@style/SwitchMyTheme"
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:layout_gravity="center"
-                            android:layout_weight="0.1"
-                            android:text="@string/settings_switchVisibleFloatActionButtonMenu_text"
-                            android:textSize="16sp" />
+                            android:orientation="horizontal">
 
-                    </LinearLayout>
+                            <ImageView
+                                android:id="@+id/imageView11"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_marginEnd="24dp"
+                                android:layout_weight="0"
+                                android:src="@drawable/rounded_hide_source_24" />
+
+                            <com.google.android.material.materialswitch.MaterialSwitch
+                                android:id="@+id/switchHideAppBarLayout"
+                                style="@style/SwitchMyTheme"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_gravity="center"
+                                android:layout_weight="0"
+                                android:text="@string/settings_switchHideAppBar"
+                                android:textSize="16sp" />
+
+                        </LinearLayout>
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:id="@+id/imageView2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_gravity="center"
+                                android:layout_marginEnd="24dp"
+                                android:layout_weight="0"
+                                android:src="@drawable/baseline_menu_24"
+                                android:tint="?attr/SettingsIconTintTheme" />
+
+                            <com.google.android.material.materialswitch.MaterialSwitch
+                                android:id="@+id/switchVisibleFloatActionButtonMenu"
+                                style="@style/SwitchMyTheme"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_gravity="center"
+                                android:layout_weight="0.1"
+                                android:text="@string/settings_switchVisibleFloatActionButtonMenu_text"
+                                android:textSize="16sp" />
+
+                        </LinearLayout>
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginBottom="8dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:id="@+id/imageView3"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_gravity="center"
+                                android:layout_marginEnd="24dp"
+                                android:layout_weight="0"
+                                android:src="@drawable/rounded_open_in_full_24"
+                                android:tint="?attr/SettingsIconTintTheme" />
+
+                            <com.google.android.material.materialswitch.MaterialSwitch
+                                android:id="@+id/switchFullscreenMode"
+                                style="@style/SwitchMyTheme"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_gravity="center"
+                                android:layout_weight="0.1"
+                                android:text="@string/settings_switchFullscreenMode_text" />
+                        </LinearLayout>
+
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginBottom="8dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:orientation="horizontal">
+
+                                <ImageView
+                                    android:id="@+id/imageView44"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="match_parent"
+                                    android:layout_gravity="center"
+                                    android:layout_marginEnd="24dp"
+                                    android:layout_weight="0"
+                                    android:src="@drawable/rounded_animated_images_24"
+                                    android:tint="?attr/SettingsIconTintTheme" />
+
+                                <com.google.android.material.materialswitch.MaterialSwitch
+                                    android:id="@+id/switchMinimizeMode"
+                                    style="@style/SwitchMyTheme"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_gravity="center"
+                                    android:layout_weight="0.1"
+                                    android:text="@string/settings_animation_interface_HomeFragment" />
+                            </LinearLayout>
+
+                        </LinearLayout>
+                    </FrameLayout>
                 </LinearLayout>
             </FrameLayout>
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="8dp">
+                android:layout_height="match_parent">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical">
 
-                    <LinearLayout
+                    <TextView
+                        android:id="@+id/textView12"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal">
+                        android:layout_height="wrap_content"
+                        android:text="Обновления"
+                        android:textSize="24sp" />
 
-                        <ImageView
-                            android:id="@+id/imageView3"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="center"
-                            android:layout_marginEnd="24dp"
-                            android:layout_weight="0"
-                            android:src="@drawable/rounded_open_in_full_24"
-                            android:tint="?attr/SettingsIconTintTheme" />
+                    <View
+                        android:id="@+id/divider7"
+                        android:layout_width="match_parent"
+                        android:layout_height="1px"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:background="?android:attr/listDivider" />
 
-                        <com.google.android.material.materialswitch.MaterialSwitch
-                            android:id="@+id/switchFullscreenMode"
-                            style="@style/SwitchMyTheme"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="center"
-                            android:layout_weight="0.1"
-                            android:text="@string/settings_switchFullscreenMode_text" />
-                    </LinearLayout>
+                    <TextView
+                        android:id="@+id/textViewCurrentVersionApp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        tools:text="Версия приложения: 1.0.0" />
 
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipFindUpdate"
+                        android:layout_width="match_parent"
+                        android:layout_height="64dp"
+                        android:text="Проверить обновление"
+                        android:textAlignment="center"
+                        app:chipIcon="@drawable/rounded_deployed_code_update_24"
+                        app:chipIconSize="24dp"
+                        app:chipIconTint="?attr/IconTintColorDayNightTheme"
+                        app:textEndPadding="16dp" />
                 </LinearLayout>
             </FrameLayout>
 
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="8dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:id="@+id/imageView44"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="center"
-                            android:layout_marginEnd="24dp"
-                            android:layout_weight="0"
-                            android:src="@drawable/rounded_animated_images_24"
-                            android:tint="?attr/SettingsIconTintTheme" />
-
-                        <com.google.android.material.materialswitch.MaterialSwitch
-                            android:id="@+id/switchMinimizeMode"
-                            style="@style/SwitchMyTheme"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="center"
-                            android:layout_weight="0.1"
-                            android:text="@string/settings_animation_interface_HomeFragment" />
-                    </LinearLayout>
-
-                </LinearLayout>
-            </FrameLayout>
         </LinearLayout>
     </ScrollView>
 

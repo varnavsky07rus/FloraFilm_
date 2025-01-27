@@ -14,17 +14,19 @@
         android:layout_height="match_parent">
 
         <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBarLayout"
             style="@null"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/MainBacgroundAppTheme"
             android:stateListAnimator="@null"
-            android:touchscreenBlocksFocus="false">
+            app:liftOnScrollColor="#00FFFFFF">
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="?attr/MainBacgroundAppTheme"
                 android:theme="?attr/actionBarTheme" />
 
             <!--app:contentInsetStartWithNavigation="0dp"-->
@@ -42,14 +44,16 @@
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/floatingActionButtonMenu"
+            style="@style/SwitchMyTheme"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
             app:backgroundTint="@color/floatActionButton"
-            app:borderWidth="2dp"
+            app:borderWidth="0dp"
             app:elevation="12dp"
             app:rippleColor="#CBFFFFFF"
+            app:shapeAppearance="@null"
             app:srcCompat="@drawable/baseline_menu_24" />
 
         <fragment

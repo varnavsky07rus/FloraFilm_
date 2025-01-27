@@ -44,10 +44,10 @@ public class LoginVkActivity extends AppCompatActivity {
     private static final String CLIENT_ID = "6121396"; //  6287487 (VK.COM)   | 6121396 (VK ADMIN)  | KATE (2685278)
     private static final String SCOPE = "1073737727"; // Полный доступ
     private static String baseURl;
-    private static final String USER_AGENT = "VKAndroidApp/5.52-4543 (Android 5.1.1; SDK 22; x86_64; unknown Android SDK built for x86_64; en; 320x240)";
-    private static final String USER_AGENT_YA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 YaBrowser/24.12.0.0 Safari/537.36";
-    private static final String USER_AGENT_KATE = "KateMobileAndroid/56 lite-460 (Android 4.4.2; SDK 19; x86; unknown Android SDK built for x86; en)";
-    private static final String REDIRECT_URI = "https://oauth.vk.com/blank.html";
+    public static final String USER_AGENT = "VKAndroidApp/5.52-4543 (Android 5.1.1; SDK 22; x86_64; unknown Android SDK built for x86_64; en; 320x240)";
+    public static final String USER_AGENT_YA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 YaBrowser/24.12.0.0 Safari/537.36";
+    public static final String USER_AGENT_KATE = "KateMobileAndroid/56 lite-460 (Android 4.4.2; SDK 19; x86; unknown Android SDK built for x86; en)";
+    public static final String REDIRECT_URI = "https://oauth.vk.com/blank.html";
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override

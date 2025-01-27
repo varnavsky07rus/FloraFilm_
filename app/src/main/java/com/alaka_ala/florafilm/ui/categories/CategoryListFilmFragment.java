@@ -199,6 +199,7 @@ public class CategoryListFilmFragment extends Fragment implements KinopoiskAPI.R
     @Override
     public void onFailure(IOException e) {
         isConnected = false;
+        if (getContext() == null) return;
         Snackbar.make(binding.getRoot(), e.getMessage(), Snackbar.LENGTH_LONG).show();
     }
 

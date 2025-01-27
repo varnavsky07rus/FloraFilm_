@@ -3,22 +3,17 @@ package com.alaka_ala.florafilm.ui.film;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
-import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.os.Bundle;
 
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -27,6 +22,10 @@ import android.widget.TextView;
 import com.alaka_ala.florafilm.R;
 import com.alaka_ala.florafilm.databinding.FragmentFilmBinding;
 import com.alaka_ala.florafilm.sys.hdvb.HDVB;
+import com.alaka_ala.florafilm.sys.hdvb.HDVBSelector;
+import com.alaka_ala.florafilm.sys.hdvb.HDVBalancer;
+import com.alaka_ala.florafilm.sys.hdvb.models.HDVBFilm;
+import com.alaka_ala.florafilm.sys.hdvb.models.HDVBSerial;
 import com.alaka_ala.florafilm.sys.kinovibe.KinoVibe;
 import com.alaka_ala.florafilm.sys.kp_api.FilmTrailer;
 import com.alaka_ala.florafilm.sys.kp_api.ItemFilmInfo;
@@ -36,19 +35,20 @@ import com.alaka_ala.florafilm.sys.kp_api.ListStaffItem;
 import com.alaka_ala.florafilm.sys.utils.PersonsRecyclerAdapter;
 import com.alaka_ala.florafilm.sys.vibix.Vibix;
 import com.alaka_ala.florafilm.sys.vibix.VibixSelector;
-import com.alaka_ala.florafilm.ui.player.exo.ExoActivity;
+import com.alaka_ala.florafilm.ui.film.vk_pager.AdapterViewPager2VkFiles;
+import com.alaka_ala.florafilm.ui.player.exo.models.EPData;
+import com.alaka_ala.florafilm.ui.vk.AccountManager;
+import com.alaka_ala.florafilm.ui.vk.LoginVkActivity;
+import com.alaka_ala.florafilm.ui.vk.parser.VKVideo;
 import com.google.android.material.snackbar.Snackbar;
 import com.squareup.picasso.Picasso;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 
-public class FilmFragment extends Fragment implements KinopoiskAPI.RequestCallbackInformationItem, KinopoiskAPI.RequestCallbackStaffList, KinopoiskAPI.RequestCallbackListVieos, Vibix.ConnectionVibix {
+public class FilmFragment extends Fragment implements Vibix.ConnectionVibix {
     private FragmentFilmBinding binding;
     private Bundle bundle;
     private KinopoiskAPI kinopoiskAPI;
@@ -66,9 +66,8 @@ public class FilmFragment extends Fragment implements KinopoiskAPI.RequestCallba
     private CardView progressBar;
     private Vibix vibix;
     private KinoVibe kinoVibe;
-
+    private VKVideo vkVideo;
     private LinearLayout linearLayoutContent;
-
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -85,77 +84,6 @@ public class FilmFragment extends Fragment implements KinopoiskAPI.RequestCallba
         if (bundle == null) return binding.getRoot();
         film = (ListFilmItem) bundle.getSerializable("film");
         if (film == null) return binding.getRoot();
-        kinopoiskId = film.getKinopoiskId();
-        kinopoiskAPI = new KinopoiskAPI(getResources().getString(R.string.api_key_kinopoisk));
-        kinopoiskAPI.getInforamationItem(kinopoiskId, this);
-        kinopoiskAPI.getListStaff(kinopoiskId, this);
-        kinopoiskAPI.getListVieos(kinopoiskId, this);
-
-
-        vibix = new Vibix(getResources().getString(R.string.api_key_vibix));
-        vibix.parse(kinopoiskId, this);
-
-
-        /*kinoVibe = new KinoVibe();
-        kinoVibe.parse(kinopoiskId, new KinoVibe.ConnectionKinoVibe() {
-            @Override
-            public void startParse() {
-
-            }
-
-            @Override
-            public void finishParse(String file) {
-                LayoutInflater inflater = getLayoutInflater();
-                View layout_film_files = inflater.inflate(R.layout.layout_film_files, null, false);
-                LinearLayout linearLayoutTitleFiles = layout_film_files.findViewById(R.id.linearLayoutTitleFiles);
-                ImageView imageViewArrowFiles = layout_film_files.findViewById(R.id.imageViewArrowFiles);
-                TextView textViewTitleBalancer = layout_film_files.findViewById(R.id.textViewTitleBalancer);
-                textViewTitleBalancer.setText("[KinoVibe]");
-                LinearLayout root = layout_film_files.findViewById(R.id.linearLayoutRoot);
-
-                linearLayoutTitleFiles.setOnClickListener(new View.OnClickListener() {
-                    boolean isAnimate = false;
-
-                    @Override
-                    public void onClick(View v) {
-                        if (!isAnimate) {
-                            if (root.getChildCount() == 0) {
-                                imageViewArrowFiles.animate().rotation(90).setListener(new AnimatorListenerAdapter() {
-                                    @Override
-                                    public void onAnimationEnd(Animator animation) {
-                                        super.onAnimationEnd(animation);
-                                        isAnimate = false;
-                                        View viewFile = inflater.inflate(R.layout.selector_film_item_2, null, false);
-                                        TextView textViewTitleFiles = viewFile.findViewById(R.id.textViewTitleFiles);
-                                        textViewTitleFiles.setText("Просмотр");
-                                        root.addView(viewFile);
-                                        root.setVisibility(View.VISIBLE);
-                                    }
-                                }).start();
-                            } else {
-                                imageViewArrowFiles.animate().rotation(0).setListener(new AnimatorListenerAdapter() {
-                                    @Override
-                                    public void onAnimationEnd(Animator animation) {
-                                        super.onAnimationEnd(animation);
-                                        isAnimate = false;
-                                        root.setVisibility(View.GONE);
-                                        root.removeAllViews();
-                                    }
-                                }).start();
-                            }
-                        }
-                    }
-                });
-
-                linearLayoutContent.addView(layout_film_files);
-            }
-
-            @Override
-            public void errorParse(String err) {
-                Snackbar.make(getView(), err, Snackbar.LENGTH_LONG).show();
-            }
-        });*/
-
 
         appBarImage = binding.appBarImage;
         imageViewLogoFilm = binding.imageViewLogoFilm;
@@ -163,13 +91,212 @@ public class FilmFragment extends Fragment implements KinopoiskAPI.RequestCallba
         textViewDescriptionFilm = binding.textViewDescriptionFilm;
         progressBar = binding.cardViewProgressBar;
 
+        getKinopoiskData();
+
+        getVibixData();
+
+        getVKData(inflater);
+
+
+
+
 
         return binding.getRoot();
     }
 
+    private void getVKData(LayoutInflater inflater) {
+        if (AccountManager.getAccount(getContext()) == null) return;
+        vkVideo = new VKVideo(AccountManager.getAccessToken(getContext()));
+
+        String nameFilm = !film.getNameRu().isEmpty() ? film.getNameRu() : film.getNameEn();
+        nameFilm += film.getType().equals("TV_SERIES") ? " (Cериал " + film.getYear() + " " + film.getNameEn() + ")" : " (Фильм " + film.getYear() + " " + (film.getNameOriginal() == null ? film.getNameOriginal() : "") + ")";
+
+        String finalNameFilm = nameFilm;
+        vkVideo.searchVideos(nameFilm, 0, new VKVideo.SearchVideosCallback() {
+            private VKVideo.SearchVideosCallback searchVideosCallback;
+
+            @Override
+            public void onSuccessSearch(ArrayList<VKVideo.VideoItem> videos) {
+                if (getContext() == null) return;
+                if (videos.isEmpty()) return;
+                searchVideosCallback = this;
+                View layoutFilmsFilesVk = inflater.inflate(R.layout.layout_films_files_vk, null, false);
+                LinearLayout linearLayoutTitleFilesVk = layoutFilmsFilesVk.findViewById(R.id.linearLayoutTitleFilesVk);
+                linearLayoutTitleFilesVk.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (layoutFilmsFilesVk.findViewById(R.id.linearLayoutRootVk).getVisibility() == View.GONE) {
+                            layoutFilmsFilesVk.findViewById(R.id.imageViewArrowFilesVk).animate().rotation(90).setListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    super.onAnimationEnd(animation);
+                                    layoutFilmsFilesVk.findViewById(R.id.linearLayoutRootVk).setVisibility(View.VISIBLE);
+                                    ViewPager2 viewP2 = layoutFilmsFilesVk.findViewById(R.id.viewP2);
+                                    AdapterViewPager2VkFiles adapterViewPager2VkFiles = new AdapterViewPager2VkFiles(getChildFragmentManager(), getLifecycle(), videos);
+                                    viewP2.setAdapter(adapterViewPager2VkFiles);
+                                }
+                            }).start();
+                        } else {
+                            layoutFilmsFilesVk.findViewById(R.id.imageViewArrowFilesVk).animate().rotation(0).setListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    super.onAnimationEnd(animation);
+                                    layoutFilmsFilesVk.findViewById(R.id.linearLayoutRootVk).setVisibility(View.GONE);
+                                }
+                            }).start();
+                        }
+
+
+                    }
+                });
+                linearLayoutContent.addView(layoutFilmsFilesVk);
+
+
+            }
+
+            @Override
+            public void onErrorSearch(Exception e) {
+                if (getContext() == null) return;
+                searchVideosCallback = this;
+                Snackbar.make(binding.getRoot(), "Ошибка поиска в ВК. Повторите попытку...", 5000).setAction("Повтрить", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        vkVideo.searchVideos(finalNameFilm, 0, searchVideosCallback);
+                    }
+                }).show();
+            }
+        });
+    }
+
+    private void getVibixData() {
+        vibix = new Vibix(getResources().getString(R.string.api_key_vibix));
+        vibix.parse(kinopoiskId, this);
+    }
+
+    private void getKinopoiskData() {
+        kinopoiskId = film.getKinopoiskId();
+        kinopoiskAPI = new KinopoiskAPI(getResources().getString(R.string.api_key_kinopoisk));
+
+        if (filmInfo == null) {
+            kinopoiskAPI.getInforamationItem(kinopoiskId, new KinopoiskAPI.RequestCallbackInformationItem() {
+                KinopoiskAPI.RequestCallbackInformationItem requestCallbackInformationItem;
+                @Override
+                public void onSuccessInfoItem(ItemFilmInfo itemFilmInfo) {
+                    requestCallbackInformationItem = this;
+                    filmInfo = itemFilmInfo;
+                    setFullData(filmInfo);
+                }
+
+                @Override
+                public void onFailureInfoItem(IOException e) {
+                    if (getContext() != null) {
+                        requestCallbackInformationItem = this;
+                        Snackbar.make(binding.getRoot(), "Ошибка загрузки информации о фильме. Повторите попытку...", 5000).setAction("Повторить", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                kinopoiskAPI.getInforamationItem(kinopoiskId, requestCallbackInformationItem);
+                            }
+                        }).show();
+                        progressBar.setVisibility(View.GONE);
+                    }
+                }
+            });
+        } else {
+            setFullData(filmInfo);
+        }
+
+        if (listStaffItem == null) {
+            kinopoiskAPI.getListStaff(kinopoiskId, new KinopoiskAPI.RequestCallbackStaffList() {
+                KinopoiskAPI.RequestCallbackStaffList requestCallbackStaffList;
+                @Override
+                public void onSuccessStaffList(ArrayList<ListStaffItem> listStaffItems) {
+                    requestCallbackStaffList = this;
+                    listStaffItem = listStaffItems;
+                }
+
+                @Override
+                public void onFailureStaffList(IOException e) {
+                    if (getContext() == null) return;
+                    requestCallbackStaffList = this;
+                    Snackbar.make(binding.getRoot(), "Ошибка загрузки списка актёров. Повторите попытку...", 5000).setAction("Повторить", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            kinopoiskAPI.getListStaff(kinopoiskId, requestCallbackStaffList);
+                        }
+                    }).show();
+                }
+
+                @Override
+                public void finishStafList() {
+                    createActors();
+                }
+
+
+            });
+
+        } else {
+            createActors();
+        }
+    }
+
+    private void createActors() {
+        RecyclerView rvActors = binding.layoutActors.rvActors;
+        FrameLayout frameLayoutRvActors = binding.layoutActors.frameLayoutRvActors;
+        LinearLayout linearLayoutActorTitle = binding.layoutActors.linearLayoutActorTitle;
+        ImageView imageViewArrowActors = binding.layoutActors.imageViewArrowActors;
+        linearLayoutActorTitle.setOnClickListener(new View.OnClickListener() {
+            private boolean isAnimate = false;
+
+            @Override
+            public void onClick(View v) {
+                if (listStaffItem != null) {
+                    if (!isAnimate) {
+                        if (frameLayoutRvActors.getVisibility() == View.GONE) {
+                            imageViewArrowActors.animate().setListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationStart(Animator animation) {
+                                    super.onAnimationStart(animation);
+                                    isAnimate = true;
+                                }
+
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    super.onAnimationEnd(animation);
+                                    isAnimate = false;
+                                    frameLayoutRvActors.setVisibility(View.VISIBLE);
+                                }
+                            }).rotation(90).start();
+                        } else {
+                            imageViewArrowActors.animate().setListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationStart(Animator animation) {
+                                    super.onAnimationStart(animation);
+                                    isAnimate = true;
+                                }
+
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    super.onAnimationEnd(animation);
+                                    isAnimate = false;
+                                    frameLayoutRvActors.setVisibility(View.GONE);
+                                }
+                            }).rotation(0).start();
+                        }
+                    }
+                } else {
+                    Snackbar.make(binding.getRoot(), "Актёры отсутствуют", 5000).show();
+                }
+
+            }
+        });
+        rvActors.setLayoutManager(new GridLayoutManager(getContext(), 3, GridLayoutManager.HORIZONTAL, false));
+        if (getContext() == null) return;
+        rvActors.setAdapter(new PersonsRecyclerAdapter(PersonsRecyclerAdapter.TYPE_HOLDER_MAIN_PERSON, listStaffItem, getLayoutInflater()));
+    }
 
     @SuppressLint("SetTextI18n")
     private void setFullData(ItemFilmInfo itemFilmInfo) {
+        progressBar.setVisibility(View.GONE);
         kinopoiskId = itemFilmInfo.getKinopoiskId();
         String description = itemFilmInfo.getDescription();
         String myShortDescription = "";
@@ -237,133 +364,23 @@ public class FilmFragment extends Fragment implements KinopoiskAPI.RequestCallba
 
     }
 
-    @Override
-    public void onSuccessInfoItem(ItemFilmInfo itemFilmInfo) {
-        filmInfo = itemFilmInfo;
-        setFullData(filmInfo);
-    }
+    private ArrayList<ListStaffItem> listStaffItem;
 
     @Override
-    public void onFailureInfoItem(IOException e) {
-        if (getContext() != null) {
-            Snackbar.make(binding.getRoot(), "Ошибка загрузки информации о фильме. Повторите попытку...", Snackbar.LENGTH_SHORT).setAction("Повторить", new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    kinopoiskAPI.getInforamationItem(kinopoiskId, FilmFragment.this);
-                }
-            }).show();
-            progressBar.setVisibility(View.GONE);
-        }
-    }
-
-    @Override
-    public void finishInfoItem() {
-        progressBar.setVisibility(View.GONE);
-    }
-
-
-    @SuppressLint("SetJavaScriptEnabled")
-    @Override
-    public void onSuccessVideo(ArrayList<FilmTrailer> filmTrailers) {
+    public void startParseVibix() {
 
     }
 
-    @Override
-    public void onFailureVideo(IOException e) {
+    private static EPData.Film vibixFilm;
+    private static EPData.Serial vibixSerial;
 
-    }
-
-    @Override
-    public void finishVideo() {
-
-    }
-
-
-    private static ArrayList<ListStaffItem> listStaffItem;
-
-    @Override
-    public void onSuccessStaffList(ArrayList<ListStaffItem> listStaffItem) {
-        FilmFragment.listStaffItem = listStaffItem;
-    }
-
-    @Override
-    public void onFailureStaffList(IOException e) {
-        Snackbar.make(binding.getRoot(), "Ошибка загрузки списка актёров. Повторите попытку...", Snackbar.LENGTH_SHORT).setAction("Повторить", new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                kinopoiskAPI.getListStaff(kinopoiskId, FilmFragment.this);
-            }
-        }).show();
-    }
-
-    @Override
-    public void finishStafList() {
-        RecyclerView rvActors = binding.layoutActors.rvActors;
-        FrameLayout frameLayoutRvActors = binding.layoutActors.frameLayoutRvActors;
-        LinearLayout linearLayoutActorTitle = binding.layoutActors.linearLayoutActorTitle;
-        ImageView imageViewArrowActors = binding.layoutActors.imageViewArrowActors;
-        linearLayoutActorTitle.setOnClickListener(new View.OnClickListener() {
-            private boolean isAnimate = false;
-
-            @Override
-            public void onClick(View v) {
-                if (listStaffItem != null) {
-                    if (!isAnimate) {
-                        if (frameLayoutRvActors.getVisibility() == View.GONE) {
-                            imageViewArrowActors.animate().setListener(new AnimatorListenerAdapter() {
-                                @Override
-                                public void onAnimationStart(Animator animation) {
-                                    super.onAnimationStart(animation);
-                                    isAnimate = true;
-                                }
-
-                                @Override
-                                public void onAnimationEnd(Animator animation) {
-                                    super.onAnimationEnd(animation);
-                                    isAnimate = false;
-                                    frameLayoutRvActors.setVisibility(View.VISIBLE);
-                                }
-                            }).rotation(90).start();
-                        } else {
-                            imageViewArrowActors.animate().setListener(new AnimatorListenerAdapter() {
-                                @Override
-                                public void onAnimationStart(Animator animation) {
-                                    super.onAnimationStart(animation);
-                                    isAnimate = true;
-                                }
-
-                                @Override
-                                public void onAnimationEnd(Animator animation) {
-                                    super.onAnimationEnd(animation);
-                                    isAnimate = false;
-                                    frameLayoutRvActors.setVisibility(View.GONE);
-                                }
-                            }).rotation(0).start();
-                        }
-                    }
-                } else {
-                    Snackbar.make(binding.getRoot(), "Актёры отсутствуют", Snackbar.LENGTH_SHORT).show();
-                }
-
-            }
-        });
-        rvActors.setLayoutManager(new GridLayoutManager(getContext(), 3, GridLayoutManager.HORIZONTAL, false));
-        if (getContext() == null) return;
-        rvActors.setAdapter(new PersonsRecyclerAdapter(PersonsRecyclerAdapter.TYPE_HOLDER_MAIN_PERSON, listStaffItem, getLayoutInflater()));
-    }
-
-
-    @Override
-    public void startParse() {
-
-    }
 
     @SuppressLint({"MissingInflatedId", "SetTextI18n"})
     @Override
-    public void finishParseFilm(Vibix.VibixFilm vibixFilm) {
-        if (vibixFilm == null) return;
+    public void finishParseFilmVibix(EPData.Film vibixFilm) {
         if (getContext() == null) return;
-
+        FilmFragment.vibixFilm = vibixFilm;
+        if (FilmFragment.vibixFilm == null) return;
         LayoutInflater inflater = getLayoutInflater();
         View layout_film_files = inflater.inflate(R.layout.layout_film_files, null, false);
         LinearLayout linearLayoutTitleFiles = layout_film_files.findViewById(R.id.linearLayoutTitleFiles);
@@ -377,7 +394,7 @@ public class FilmFragment extends Fragment implements KinopoiskAPI.RequestCallba
 
             @Override
             public void onClick(View v) {
-                if (vibixFilm.getTranslations().isEmpty()) {
+                if (FilmFragment.vibixFilm.getTranslations().isEmpty()) {
                     Snackbar.make(binding.getRoot(), "Файлы отсутствуют", Snackbar.LENGTH_SHORT).show();
                 } else {
                     if (isAnimate) return;
@@ -426,14 +443,14 @@ public class FilmFragment extends Fragment implements KinopoiskAPI.RequestCallba
             }
         });
         vibixSelector.buildSelector(getActivity());
-
-
     }
 
     @SuppressLint("MissingInflatedId")
     @Override
-    public void finishParseSerial(Vibix.VibixSerial vibixSerial) {
+    public void finishParseSerialVibix(EPData.Serial vibixSerial) {
         if (getContext() == null) return;
+        FilmFragment.vibixSerial = vibixSerial;
+        if (FilmFragment.vibixSerial == null) return;
         LayoutInflater inflater = getLayoutInflater();
         View layout_film_files = inflater.inflate(R.layout.layout_film_files, null, false);
         LinearLayout linearLayoutTitleFiles = layout_film_files.findViewById(R.id.linearLayoutTitleFiles);
@@ -495,9 +512,9 @@ public class FilmFragment extends Fragment implements KinopoiskAPI.RequestCallba
 
     @SuppressLint({"MissingInflatedId", "UseCompatLoadingForDrawables", "SetTextI18n"})
     @Override
-    public void errorParse(IOException e) {
+    public void errorParseVibix(IOException e) {
         if (!e.getMessage().equals("Not Found")) {
-            Snackbar.make(binding.getRoot(), "ERR:[VIBIX] | " + e.getMessage(), Snackbar.LENGTH_SHORT).setAction("Повторить", new View.OnClickListener() {
+            Snackbar.make(binding.getRoot(), "ERR:[VIBIX] | " + e.getMessage(), 5000).setAction("Повторить", new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     vibix.parse(kinopoiskId, FilmFragment.this);
@@ -518,7 +535,7 @@ public class FilmFragment extends Fragment implements KinopoiskAPI.RequestCallba
                 public void onClick(View v) {
                     ++countTapTitle[0];
                     if (countTapTitle[0] == 10) {
-                        Snackbar.make(binding.getRoot(), "Нормально крутится?!\uD83D\uDE43", Snackbar.LENGTH_SHORT).show();
+                        Snackbar.make(binding.getRoot(), "Нормально крутится?!\uD83D\uDE43", 3000).show();
                         return;
                     }
                     imageViewArrowFiles.animate().rotation(360).setListener(new AnimatorListenerAdapter() {

@@ -62,4 +62,9 @@ public class AccountManager extends LoginVkActivity {
         editor.apply();
         return true;
     }
+
+    public static String getAccessToken(Context context) {
+        Account account = getAccount(context);
+        return account.getAccessToken();
+    }
 }

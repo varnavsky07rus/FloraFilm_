@@ -4,7 +4,9 @@ import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -19,6 +21,7 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.EdgeEffect;
+import android.widget.TextClock;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -44,6 +47,7 @@ import com.alaka_ala.florafilm.sys.update_app.UpdateApp;
 import com.alaka_ala.florafilm.sys.utils.SettingsApp;
 import com.alaka_ala.florafilm.sys.utils.ViewClickable;
 import com.alaka_ala.florafilm.ui.updateApp.UpdateActivity;
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -51,6 +55,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
+
+import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
@@ -64,6 +70,8 @@ public class MainActivity extends AppCompatActivity {
     private static CallbackFullscreenAppMode callbackFullscreenAppMode;
     private AppBarConfiguration appBarConfiguration;
     private CoordinatorLayout coordinatorLayout;
+    private AppBarLayout appBarLayout;
+    private TextClock textClock;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -86,6 +94,15 @@ public class MainActivity extends AppCompatActivity {
         toolbar = binding.toolbar;
         drawerLayout = binding.drawerLayout;
         coordinatorLayout = binding.coordinatorLayout;
+        appBarLayout = binding.appBarLayout;
+        textClock = binding.textClock;
+
+
+        if (settingsApp.getParam(SettingsApp.SettingsKeys.HIDE_APP_BAR_LAYOUT, SettingsApp.SettingsDefsVal.HIDE_APP_BAR_LAYOUT)) {
+            appBarLayout.setVisibility(View.GONE);
+            textClock.setVisibility(View.GONE);
+        }
+
 
         setSupportActionBar(toolbar);
 
@@ -109,6 +126,20 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFullscreenAppMode(boolean fullScreen) {
                 fullscreenAppMode(settingsApp.getParam(SettingsApp.SettingsKeys.FULL_SCREEN_APP_MODE, fullScreen), true);
+            }
+
+            @Override
+            public void onHideAppBars(boolean hide) {
+                appBarLayout.setVisibility(hide ? View.GONE : View.VISIBLE);
+                textClock.setVisibility(hide ? View.GONE : View.VISIBLE);
+                Snackbar.make(binding.getRoot(), "Перезагрузить приложение сейчас?", Snackbar.LENGTH_SHORT).setAction("Да", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        finish();
+                        startActivity(MainActivity.this.getIntent());
+                    }
+                }).show();
+
             }
         });
 
@@ -175,17 +206,17 @@ public class MainActivity extends AppCompatActivity {
 
         updateStatusBarIconColor(this);
 
-        UpdateApp.findNewVersion(this, new UpdateApp.FindUpdateCallback() {
+        UpdateApp.findUpdate(this, new UpdateApp.FindUpdateCallback() {
             @Override
-            public void onUpdateAvailable(String newVersionCode, String description, String urlAPK, String urlMetadataJson) {
+            public void onUpdateDetect(String urlApk, String newVersionName, int newVersionCode, int currentVersionCode) {
                 Snackbar.make(binding.getRoot(), "Доступно обновление", Snackbar.LENGTH_SHORT).setAction("Обновить", new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Intent intent = new Intent(MainActivity.this, UpdateActivity.class);
                         intent.putExtra("newVersionCode", newVersionCode);
-                        intent.putExtra("description", description);
-                        intent.putExtra("urlAPK", urlAPK);
-                        intent.putExtra("urlMetadataJson", urlMetadataJson);
+                        intent.putExtra("currentVersionCode", currentVersionCode);
+                        intent.putExtra("newVersionName", newVersionName);
+                        intent.putExtra("urlAPK", urlApk);
                         startActivity(intent);
 
                     }
@@ -193,8 +224,8 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onError(String error, String moreError) {
-                new MaterialAlertDialogBuilder(MainActivity.this).setTitle("Обновление").setMessage(error).show();
+            public void findError(String error) {
+                new MaterialAlertDialogBuilder(MainActivity.this).setMessage(error).show();
             }
         });
 
@@ -320,8 +351,13 @@ public class MainActivity extends AppCompatActivity {
         callbackFullscreenAppMode = cb;
     }
 
+    public static void onHideAppBarLayout(boolean hide) {
+        callbackFullscreenAppMode.onHideAppBars(hide);
+    }
+
     private interface CallbackFullscreenAppMode {
         void onFullscreenAppMode(boolean fullScreen);
+        void onHideAppBars(boolean hide);
     }
 
     public static void updateStatusBarIconColor(Activity activity) {

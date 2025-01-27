@@ -106,6 +106,9 @@ public class SettingsApp {
          * чтобы выполнить поиск необходимо нажать на кнопку на клавиатуре*/
         public static String HIDE_HELPER_SEARCH = "0x00004";
 
+        /**Ключ параметра скрытия ActionBarLayout (верхней панели) что бы развернуть приложение на весь экран*/
+        public static String HIDE_APP_BAR_LAYOUT = "0x00005";
+
     }
 
     public static class SettingsDefsVal {
@@ -122,6 +125,9 @@ public class SettingsApp {
          * Более подробная информация описана в документации ключа.
          * По умолчанию скрытие выключено, если False - значит слой видно, если True - скрыто*/
         public static boolean HIDE_HELPER_SEARCH = false;
+
+        /**Стандартное значение настройки параметра {@link SettingsKeys#HIDE_APP_BAR_LAYOUT}*/
+        public static boolean HIDE_APP_BAR_LAYOUT = false;
 
     }
 

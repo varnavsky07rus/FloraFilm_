@@ -59,6 +59,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
                 android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
                 android:layout_marginBottom="150dp"
                 android:foregroundGravity="top"
                 app:layout_collapseMode="pin" />
@@ -102,8 +104,7 @@
                 android:id="@+id/layoutActors"
                 layout="@layout/layout_rv_film_actors"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp" />
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

@@ -1,9 +1,11 @@
 package com.alaka_ala.florafilm.ui.settings;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
@@ -17,12 +19,18 @@ import android.widget.TextView;
 import com.alaka_ala.florafilm.MainActivity;
 import com.alaka_ala.florafilm.R;
 import com.alaka_ala.florafilm.databinding.FragmentSettingsAppBinding;
+import com.alaka_ala.florafilm.sys.update_app.UpdateApp;
 import com.alaka_ala.florafilm.sys.utils.SettingsApp;
+import com.alaka_ala.florafilm.ui.updateApp.UpdateActivity;
 import com.alaka_ala.florafilm.ui.vk.AccountManager;
 import com.alaka_ala.florafilm.ui.vk.LoginVkActivity;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.snackbar.Snackbar;
 import com.squareup.picasso.Picasso;
+
+import java.io.File;
 
 public class SettingsAppFragment extends Fragment {
     private FragmentSettingsAppBinding binding;
@@ -99,7 +107,7 @@ public class SettingsAppFragment extends Fragment {
                 TextView textViewNumberMaskProfile = binding.textViewNumberMaskProfile;
 
                 textViewNameProfile.setText("Добавить аккаунт");
-                textViewNumberMaskProfile.setText("+7 ###-###-##-##");
+                textViewNumberMaskProfile.setText("+7 ****-***-**-**");
 
 
                 Snackbar.make(binding.getRoot(), "Аккаунт удален", Snackbar.LENGTH_SHORT).show();
@@ -112,6 +120,51 @@ public class SettingsAppFragment extends Fragment {
             public void onClick(View v) {
                 Intent intent = new Intent(getContext(), LoginVkActivity.class);
                 getContext().startActivity(intent);
+            }
+        });
+
+        TextView textViewCurrentVersionApp = binding.textViewCurrentVersionApp;
+        textViewCurrentVersionApp.setText("Версия приложения: " + UpdateApp.getCurrentAppVersionName(getContext()) + "(" + UpdateApp.getCurrentAppVersionCode(getContext()) + ")");
+
+        Chip chipFindUpdate = binding.chipFindUpdate;
+        chipFindUpdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                UpdateApp.findUpdate(getContext(), new UpdateApp.FindUpdateCallback() {
+                    @Override
+                    public void onUpdateDetect(String urlApk, String newVersionName, int newVersionCode, int currentVersionCode) {
+                        Snackbar.make(binding.getRoot(), "Доступно обновление", Snackbar.LENGTH_SHORT).setAction("Обновить", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(getContext(), UpdateActivity.class);
+                                intent.putExtra("newVersionCode", newVersionCode);
+                                intent.putExtra("currentVersionCode", currentVersionCode);
+                                intent.putExtra("newVersionName", newVersionName);
+                                intent.putExtra("urlAPK", urlApk);
+                                startActivity(intent);
+
+                            }
+                        }).show();
+                    }
+
+                    @Override
+                    public void findError(String error) {
+                        new MaterialAlertDialogBuilder(getContext()).setMessage(error).show();
+                    }
+                });
+            }
+        });
+
+
+        MaterialSwitch switchHideAppBarLayout = binding.switchHideAppBarLayout;
+        switchHideAppBarLayout.setChecked(settingsApp.getParam(
+                SettingsApp.SettingsKeys.HIDE_APP_BAR_LAYOUT,
+                SettingsApp.SettingsDefsVal.HIDE_APP_BAR_LAYOUT));
+        switchHideAppBarLayout.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                settingsApp.saveParam(SettingsApp.SettingsKeys.HIDE_APP_BAR_LAYOUT, isChecked);
+                MainActivity.onHideAppBarLayout(isChecked);
             }
         });
 
