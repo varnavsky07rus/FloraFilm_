@@ -50,7 +50,7 @@ public class UpdateActivity extends AppCompatActivity {
 
         int newVersionCode = getIntent().getIntExtra("newVersionCode", 0);
         String newVersionName = getIntent().getStringExtra("newVersionName");
-        String description = getResources().getString(R.string.v1_0_5);
+        String description = getResources().getString(R.string.v1_0_6);
         String urlAPK = getIntent().getStringExtra("urlAPK");
         String urlMetadataJson = getIntent().getStringExtra("urlMetadataJson");
 
