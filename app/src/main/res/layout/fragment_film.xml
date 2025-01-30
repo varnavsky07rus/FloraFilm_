@@ -40,7 +40,7 @@
             android:foreground="@drawable/gradient_poster"
             app:contentScrim="?attr/colorPrimary"
 
-            app:layout_scrollFlags="scroll|enterAlwaysCollapsed|snap"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
             app:layout_scrollInterpolator="@android:interpolator/fast_out_slow_in"
             app:toolbarId="@+id/toolbar">
 
@@ -52,7 +52,7 @@
                 android:foregroundGravity="bottom"
                 android:scaleType="centerCrop"
                 android:src="@drawable/sad_rounded_square_emoticon"
-                app:layout_collapseMode="parallax" />
+                app:layout_collapseMode="none" />
 
             <ImageView
                 android:id="@+id/imageViewLogoFilm"
@@ -63,7 +63,7 @@
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="150dp"
                 android:foregroundGravity="top"
-                app:layout_collapseMode="pin" />
+                app:layout_collapseMode="none" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 

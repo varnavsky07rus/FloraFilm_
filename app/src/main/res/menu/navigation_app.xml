@@ -22,6 +22,10 @@
                 android:id="@+id/viewedFragment"
                 android:icon="@drawable/rounded_folder_eye_24"
                 android:title="Просмотренные" />
+            <item
+                android:id="@+id/VKGroupsFragment"
+                android:icon="@drawable/vk"
+                android:title="VK Группы" />
         </menu>
     </item>
     <item

@@ -49,7 +49,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
-            app:backgroundTint="@color/floatActionButton"
+            app:backgroundTint="?attr/FloatingActionButtonTheme"
             app:borderWidth="0dp"
             app:elevation="12dp"
             app:rippleColor="#CBFFFFFF"

@@ -17,8 +17,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -32,6 +30,8 @@ public class VKVideo {
     public static final String METHOD_VIDEO_GET = "video.get";
     public static final String METHOD_VIDEO_SEARCH = "video.search";
     public static final String METHOD_VIDEO_COMMENTS = "video.getComments";
+    public static final String METHOD_VIDEO_GET_ALBUMS = "video.getAlbums";
+
     public static String DEF_USER_AGENT;
     private final String ACCESS_TOKEN;
 
@@ -95,122 +95,7 @@ public class VKVideo {
                             JSONObject jsonBody = new JSONObject(body);
                             jsonBody = jsonBody.getJSONObject("response");
                             JSONArray items = jsonBody.getJSONArray("items");
-                            ArrayList<VideoItem> videos = new ArrayList<>();
-                            for (int i = 0; i < items.length(); i++) {
-                                JSONObject files = items.getJSONObject(i).getJSONObject("files");
-                                JSONObject trailer = null;
-                                if (items.getJSONObject(i).has("trailer")) {
-                                    trailer = items.getJSONObject(i).getJSONObject("trailer");
-                                }
-                                JSONArray images = items.getJSONObject(i).getJSONArray("image");
-                                JSONArray first_frames = items.getJSONObject(i).getJSONArray("first_frame");
-                                JSONObject likes = items.getJSONObject(i).getJSONObject("likes");
-                                JSONObject reposts = items.getJSONObject(i).getJSONObject("reposts");
-
-                                int comments = items.getJSONObject(i).has("comments") ? items.getJSONObject(i).getInt("comments") : 0;
-                                String description = items.getJSONObject(i).has("description") ? items.getJSONObject(i).getString("description") : "";
-                                int duration = items.getJSONObject(i).has("duration") ? items.getJSONObject(i).getInt("duration") : 0;
-                                int id = items.getJSONObject(i).has("id") ? items.getJSONObject(i).getInt("id") : 0;
-                                int owner_id = items.getJSONObject(i).has("owner_id") ? items.getJSONObject(i).getInt("owner_id") : 0;
-                                String ov_id = items.getJSONObject(i).has("ov_id") ? items.getJSONObject(i).getString("ov_id") : "";
-                                String title = items.getJSONObject(i).has("title") ? items.getJSONObject(i).getString("title") : "";
-                                String player = items.getJSONObject(i).has("player") ? items.getJSONObject(i).getString("player") : "";
-                                String track_code = items.getJSONObject(i).has("track_code") ? items.getJSONObject(i).getString("track_code") : "";
-                                String type = items.getJSONObject(i).has("type") ? items.getJSONObject(i).getString("type") : "";
-                                int views = items.getJSONObject(i).getInt("views");
-
-
-                                VideoItem.Builder builder = new VideoItem.Builder();
-
-                                VideoItem.File filesList;
-                                ArrayList<VideoItem.Image> imageList = new ArrayList<>();
-                                ArrayList<VideoItem.FirstFrame> firstFrameList = new ArrayList<>();
-                                VideoItem.Trailer trailerList;
-                                VideoItem.Likes likesList;
-                                VideoItem.Reposts repostsList;
-
-
-                                // Тут надо исключить файлы которые отсустсвуют
-
-                                VideoItem.File.Builder bFile = new VideoItem.File.Builder();
-
-                                bFile.set144(files.has("mp4_144") ? files.getString("mp4_144") : "");
-
-                                bFile.set240(files.has("mp4_240") ? files.getString("mp4_240") : "");
-                                bFile.set360(files.has("mp4_360") ? files.getString("mp4_360") : "");
-                                bFile.set480(files.has("mp4_480") ? files.getString("mp4_480") : "");
-                                bFile.set720(files.has("mp4_720") ? files.getString("mp4_720") : "");
-                                bFile.set1080(files.has("mp4_1080") ? files.getString("mp4_1080") : "");
-                                bFile.setHls(files.has("hls") ? files.getString("hls") : "");
-                                bFile.setDashSep(files.has("dash_sep") ? files.getString("dash_sep") : "");
-                                bFile.setDashStreams(files.has("dash_streams") ? files.getString("dash_streams") : "");
-                                bFile.setHlsStreams(files.has("hls_streams") ? files.getString("hls_streams") : "");
-                                bFile.setFailoverHost(files.has("failover_host") ? files.getString("failover_host") : "");
-                                filesList = bFile.build();
-                                builder.setFiles(filesList);
-
-                                for (int j = 0; j < images.length(); j++) {
-                                    JSONObject image = images.getJSONObject(j);
-                                    VideoItem.Image.Builder bImage = new VideoItem.Image.Builder();
-                                    bImage.setUrl(image.has("url") ? image.getString("url") : "");
-                                    bImage.setHeight(image.has("height") ? image.getInt("height") : 0);
-                                    bImage.setWidth(image.has("width") ? image.getInt("width") : 0);
-                                    imageList.add(bImage.build());
-                                }
-                                builder.setImages(imageList);
-
-                                for (int j = 0; j < first_frames.length(); j++) {
-                                    JSONObject firstFrame = first_frames.getJSONObject(j);
-                                    VideoItem.FirstFrame.Builder bFirstFrame = new VideoItem.FirstFrame.Builder();
-                                    bFirstFrame.setUrl(firstFrame.has("url") ? firstFrame.getString("url") : "");
-                                    bFirstFrame.setHeight(firstFrame.has("height") ? firstFrame.getInt("height") : 0);
-                                    bFirstFrame.setWidth(firstFrame.has("width") ? firstFrame.getInt("width") : 0);
-                                    firstFrameList.add(bFirstFrame.build());
-                                }
-                                builder.setFirstFrames(firstFrameList);
-
-                                if (trailer != null) {
-                                    VideoItem.Trailer.Builder bTrailer = new VideoItem.Trailer.Builder();
-                                    bTrailer.set240(trailer.has("mp4_240") ? trailer.getString("mp4_240") : "");
-                                    bTrailer.set360(trailer.has("mp4_360") ? trailer.getString("mp4_360") : "");
-                                    bTrailer.set480(trailer.has("mp4_480") ? trailer.getString("mp4_480") : "");
-                                    bTrailer.set720(trailer.has("mp4_720") ? trailer.getString("mp4_720") : "");
-                                    bTrailer.set1080(trailer.has("mp4_1080") ? trailer.getString("mp4_1080") : "");
-                                    trailerList = bTrailer.build();
-                                    builder.setTrailers(trailerList);
-                                }
-
-
-                                VideoItem.Likes.Builder bLikes = new VideoItem.Likes.Builder();
-                                bLikes.setCount(likes.has("count") ? likes.getInt("count") : 0);
-                                bLikes.setUser_likes(likes.has("user_likes") ? likes.getInt("user_likes") : 0);
-                                likesList = bLikes.build();
-                                builder.setLikes(likesList);
-
-
-                                VideoItem.Reposts.Builder bReposts = new VideoItem.Reposts.Builder();
-                                bReposts.setCount(reposts.has("count") ? reposts.getInt("count") : 0);
-                                bReposts.setMailCount(reposts.has("mail_count") ? reposts.getInt("mail_count") : 0);
-                                bReposts.setWallCount(reposts.has("wall_count") ? reposts.getInt("wall_count") : 0);
-                                bReposts.setUserReposted(reposts.has("user_reposted") ? reposts.getInt("user_reposted") : 0);
-                                repostsList = bReposts.build();
-                                builder.setReposts(repostsList);
-
-                                builder.setCountComments(comments);
-                                builder.setDescription(description);
-                                builder.setDuration(duration);
-                                builder.setId(id);
-                                builder.setOwnerId(owner_id);
-                                //builder.setAuthor(is_author);
-                                builder.setOvId(ov_id);
-                                builder.setTitle(title);
-                                //builder.setFavorite(is_favorite);
-                                builder.setPlayer(player);
-                                builder.setTrackCode(track_code);
-                                builder.setType(type);
-                                builder.setViews(views);
-                                videos.add(builder.build());
-                            }
+                            ArrayList<VideoItem> videos = getVideoItems(items);
 
                             Bundle bundle = new Bundle();
                             bundle.putBoolean("ok", true);
@@ -237,6 +122,279 @@ public class VKVideo {
         void onSuccess(ArrayList<VideoItem> videos);
 
         void onError(Exception e);
+    }
+
+
+    public void getAlbums(String owner_id, int offset, GetAlbumsCallback callback) {
+        Handler handler = new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(@NonNull Message msg) {
+                Bundle bundle = msg.getData();
+                boolean ok = bundle.getBoolean("ok", false);
+                if (ok) {
+                    GroupItem group = (GroupItem) bundle.getSerializable("group");
+                    callback.onSuccess(group);
+                    callback.finish();
+                } else {
+                    String error = bundle.getString("error", "");
+                    callback.onError(error);
+                }
+                return false;
+            }
+        });
+        int count = 100;
+        int extended = 1;
+        String url = DEF_HOST_API + METHOD_VIDEO_GET_ALBUMS + "?owner_id=" + owner_id + "&extended=" + extended + "&count=" + count + "&offset=" + offset + "&access_token=" + ACCESS_TOKEN + "&v=" + VERSION_API;
+        OkHttpClient okHttpClient = new OkHttpClient();
+        Request.Builder req = new Request.Builder();
+        req.url(url);
+        req.addHeader("User-Agent", DEF_USER_AGENT);
+        req.addHeader("Accept-Language", "ru,en;q=0.9");
+        okHttpClient.newCall(req.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                sendHandlerError(e, handler);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String body = response.body().string();
+                if (response.isSuccessful()) {
+                    if (JsonParser.parseString(body).isJsonObject()) {
+                        try {
+                            JSONObject jsonBody = new JSONObject(body);
+                            jsonBody = jsonBody.getJSONObject("response");
+                            JSONArray items = jsonBody.getJSONArray("items");
+
+                            // Для добавления в GroupItem
+                            ArrayList<PlaylistGroupItem> playlistsGroupItems = new ArrayList<>();
+                            for (int i = 0; i < items.length(); i++) {
+                                JSONObject item = items.getJSONObject(i);
+                                PlaylistGroupItem.Builder builder = new PlaylistGroupItem.Builder();
+                                builder.setCount(item.has("count") ? item.getInt("count") : 0);
+                                builder.setUpdatedTime(item.has("updated_time") ? item.getInt("updated_time") : 0);
+                                builder.setId(item.has("id") ? item.getInt("id") : 0);
+                                builder.setOwnerId(item.has("owner_id") ? item.getInt("owner_id") : 0);
+                                builder.setTitle(item.has("title") ? item.getString("title") : "");
+                                // Парсинг изображений
+                                ArrayList<VideoItem.Image> images = new ArrayList<>();
+                                JSONArray imagesJson = item.has("image") ? item.getJSONArray("image") : new JSONArray();
+                                for (int j = 0; j < imagesJson.length(); j++) {
+                                    JSONObject image = imagesJson.getJSONObject(j);
+                                    VideoItem.Image.Builder bImage = new VideoItem.Image.Builder();
+                                    bImage.setUrl(image.has("url") ? image.getString("url") : "");
+                                    bImage.setHeight(image.has("height") ? image.getInt("height") : 0);
+                                    bImage.setWidth(image.has("width") ? image.getInt("width") : 0);
+                                    images.add(bImage.build());
+                                }
+                                builder.setImages(images);
+                                builder.setIsSubscribed(item.has("is_subscribed") && item.getBoolean("is_subscribed"));
+                                builder.setCanView(item.has("can_view") ? item.getInt("can_view") : 0);
+                                builder.setFirstVideo_id(item.has("first_video_id") ? item.getString("first_video_id") : "");
+                                builder.setCanSubscribe(item.has("can_subscribe") ? item.getInt("can_subscribe") : 0);
+                                builder.setResponseType(item.has("response_type") ? item.getString("response_type") : "");
+                                playlistsGroupItems.add(builder.build());
+                            }
+
+                            // Получение всех видео группы
+                            OkHttpClient oks = new OkHttpClient();
+                            Request.Builder req = new Request.Builder();
+                            String urlVideoGet = DEF_HOST_API + METHOD_VIDEO_GET + "?owner_id=" + owner_id + "&extended=" + extended + "&count=" + count + "&offset=" + offset + "&access_token=" + ACCESS_TOKEN + "&v=" + VERSION_API;
+                            req.url(urlVideoGet);
+                            oks.newCall(req.build()).enqueue(new Callback() {
+                                @Override
+                                public void onFailure(Call call, IOException e) {
+                                    sendHandlerError(e, handler);
+                                }
+
+                                @Override
+                                public void onResponse(Call call, Response response) throws IOException {
+                                    String body = response.body().string();
+                                    if (response.isSuccessful()) {
+                                        if (JsonParser.parseString(body).isJsonObject()) {
+                                            try {
+                                                JSONObject jsonBody = new JSONObject(body);
+                                                jsonBody = jsonBody.has("response") ? jsonBody.getJSONObject("response") : new JSONObject();
+                                                JSONArray items = jsonBody.has("items") ? jsonBody.getJSONArray("items") : new JSONArray();
+                                                JSONObject group = jsonBody.has("groups") ? jsonBody.getJSONArray("groups").getJSONObject(0) : new JSONObject();
+
+                                                int count = jsonBody.has("count") ? jsonBody.getInt("count") : 0;
+                                                int is_closed = group.getInt("is_closed");
+                                                String name = group.getString("name");
+                                                String photo_100 = group.getString("photo_100");
+                                                String screen_name = group.getString("screen_name");
+
+                                                ArrayList<VideoItem> videos = getVideoItems(items);
+
+                                                GroupItem groupItem = new GroupItem(playlistsGroupItems, videos, name, screen_name, count, is_closed, photo_100);
+
+                                                Bundle bundle = new Bundle();
+                                                bundle.putBoolean("ok", true);
+                                                bundle.putSerializable("group", groupItem);
+                                                Message msg = new Message();
+                                                msg.setData(bundle);
+                                                handler.sendMessage(msg);
+
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
+                                                onFailure(call, new IOException("#2 Ошибка создания объекта JSONObject: " + e.getMessage()));
+                                            }
+                                        } else {
+                                            onFailure(call, new IOException("#1 Полученный ответ не содержит данных формата JSONObject"));
+                                        }
+                                    }
+                                }
+                            });
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            onFailure(call, new IOException("Ошибка создания объекта JSONObject: " + e.getMessage()));
+                        }
+                    }
+                } else {
+                    onFailure(call, new IOException("Ошибка получения альбомов. Код ответа: " + response.code()));
+                }
+            }
+        });
+
+
+    }
+
+    private static @NonNull ArrayList<VideoItem> getVideoItems(JSONArray items) throws JSONException {
+        ArrayList<VideoItem> videos = new ArrayList<>();
+        for (int i = 0; i < items.length(); i++) {
+            JSONObject files = items.getJSONObject(i).has("files") ? items.getJSONObject(i).getJSONObject("files") : new JSONObject();
+            JSONObject trailer = null;
+            if (items.getJSONObject(i).has("trailer")) {
+                trailer = items.getJSONObject(i).getJSONObject("trailer");
+            }
+            JSONArray images = items.getJSONObject(i).has("image") ? items.getJSONObject(i).getJSONArray("image") : new JSONArray();
+            JSONArray first_frames = items.getJSONObject(i).has("first_frame") ? items.getJSONObject(i).getJSONArray("first_frame") : new JSONArray();
+            JSONObject likes = items.getJSONObject(i).has("likes") ? items.getJSONObject(i).getJSONObject("likes") : new JSONObject();
+            JSONObject reposts = items.getJSONObject(i).has("reposts") ? items.getJSONObject(i).getJSONObject("reposts") : new JSONObject();
+
+            int comments = items.getJSONObject(i).has("comments") ? items.getJSONObject(i).getInt("comments") : 0;
+            String description = items.getJSONObject(i).has("description") ? items.getJSONObject(i).getString("description") : "";
+            int duration = items.getJSONObject(i).has("duration") ? items.getJSONObject(i).getInt("duration") : 0;
+            int id = items.getJSONObject(i).has("id") ? items.getJSONObject(i).getInt("id") : 0;
+            int owner_id = items.getJSONObject(i).has("owner_id") ? items.getJSONObject(i).getInt("owner_id") : 0;
+            String ov_id = items.getJSONObject(i).has("ov_id") ? items.getJSONObject(i).getString("ov_id") : "";
+            String title = items.getJSONObject(i).has("title") ? items.getJSONObject(i).getString("title") : "";
+            String player = items.getJSONObject(i).has("player") ? items.getJSONObject(i).getString("player") : "";
+            String track_code = items.getJSONObject(i).has("track_code") ? items.getJSONObject(i).getString("track_code") : "";
+            String type = items.getJSONObject(i).has("type") ? items.getJSONObject(i).getString("type") : "";
+            int views = items.getJSONObject(i).getInt("views");
+
+
+            VideoItem.Builder builder = new VideoItem.Builder();
+
+            VideoItem.File filesList;
+            ArrayList<VideoItem.Image> imageList = new ArrayList<>();
+            ArrayList<VideoItem.FirstFrame> firstFrameList = new ArrayList<>();
+            VideoItem.Trailer trailerList;
+            VideoItem.Likes likesList;
+            VideoItem.Reposts repostsList;
+
+
+            // Тут надо исключить файлы которые отсустсвуют
+
+            VideoItem.File.Builder bFile = new VideoItem.File.Builder();
+
+            bFile.set144(files.has("mp4_144") ? files.getString("mp4_144") : "");
+
+            bFile.set240(files.has("mp4_240") ? files.getString("mp4_240") : "");
+            bFile.set360(files.has("mp4_360") ? files.getString("mp4_360") : "");
+            bFile.set480(files.has("mp4_480") ? files.getString("mp4_480") : "");
+            bFile.set720(files.has("mp4_720") ? files.getString("mp4_720") : "");
+            bFile.set1080(files.has("mp4_1080") ? files.getString("mp4_1080") : "");
+            bFile.setHls(files.has("hls") ? files.getString("hls") : "");
+            bFile.setDashSep(files.has("dash_sep") ? files.getString("dash_sep") : "");
+            bFile.setDashStreams(files.has("dash_streams") ? files.getString("dash_streams") : "");
+            bFile.setHlsStreams(files.has("hls_streams") ? files.getString("hls_streams") : "");
+            bFile.setFailoverHost(files.has("failover_host") ? files.getString("failover_host") : "");
+            filesList = bFile.build();
+            builder.setFiles(filesList);
+
+            for (int j = 0; j < images.length(); j++) {
+                JSONObject image = images.getJSONObject(j);
+                VideoItem.Image.Builder bImage = new VideoItem.Image.Builder();
+                bImage.setUrl(image.has("url") ? image.getString("url") : "");
+                bImage.setHeight(image.has("height") ? image.getInt("height") : 0);
+                bImage.setWidth(image.has("width") ? image.getInt("width") : 0);
+                imageList.add(bImage.build());
+            }
+            builder.setImages(imageList);
+
+            for (int j = 0; j < first_frames.length(); j++) {
+                JSONObject firstFrame = first_frames.getJSONObject(j);
+                VideoItem.FirstFrame.Builder bFirstFrame = new VideoItem.FirstFrame.Builder();
+                bFirstFrame.setUrl(firstFrame.has("url") ? firstFrame.getString("url") : "");
+                bFirstFrame.setHeight(firstFrame.has("height") ? firstFrame.getInt("height") : 0);
+                bFirstFrame.setWidth(firstFrame.has("width") ? firstFrame.getInt("width") : 0);
+                firstFrameList.add(bFirstFrame.build());
+            }
+            builder.setFirstFrames(firstFrameList);
+
+            if (trailer != null) {
+                VideoItem.Trailer.Builder bTrailer = new VideoItem.Trailer.Builder();
+                bTrailer.set240(trailer.has("mp4_240") ? trailer.getString("mp4_240") : "");
+                bTrailer.set360(trailer.has("mp4_360") ? trailer.getString("mp4_360") : "");
+                bTrailer.set480(trailer.has("mp4_480") ? trailer.getString("mp4_480") : "");
+                bTrailer.set720(trailer.has("mp4_720") ? trailer.getString("mp4_720") : "");
+                bTrailer.set1080(trailer.has("mp4_1080") ? trailer.getString("mp4_1080") : "");
+                trailerList = bTrailer.build();
+                builder.setTrailers(trailerList);
+            }
+
+
+            VideoItem.Likes.Builder bLikes = new VideoItem.Likes.Builder();
+            bLikes.setCount(likes.has("count") ? likes.getInt("count") : 0);
+            bLikes.setUser_likes(likes.has("user_likes") ? likes.getInt("user_likes") : 0);
+            likesList = bLikes.build();
+            builder.setLikes(likesList);
+
+
+            VideoItem.Reposts.Builder bReposts = new VideoItem.Reposts.Builder();
+            bReposts.setCount(reposts.has("count") ? reposts.getInt("count") : 0);
+            bReposts.setMailCount(reposts.has("mail_count") ? reposts.getInt("mail_count") : 0);
+            bReposts.setWallCount(reposts.has("wall_count") ? reposts.getInt("wall_count") : 0);
+            bReposts.setUserReposted(reposts.has("user_reposted") ? reposts.getInt("user_reposted") : 0);
+            repostsList = bReposts.build();
+            builder.setReposts(repostsList);
+
+            builder.setCountComments(comments);
+            builder.setDescription(description);
+            builder.setDuration(duration);
+            builder.setId(id);
+            builder.setOwnerId(owner_id);
+            //builder.setAuthor(is_author);
+            builder.setOvId(ov_id);
+            builder.setTitle(title);
+            //builder.setFavorite(is_favorite);
+            builder.setPlayer(player);
+            builder.setTrackCode(track_code);
+            builder.setType(type);
+            builder.setViews(views);
+            videos.add(builder.build());
+        }
+        return videos;
+    }
+
+    private static void sendHandlerError(IOException e, Handler handler) {
+        Bundle bundle = new Bundle();
+        bundle.putBoolean("ok", false);
+        bundle.putString("error", e.getMessage());
+        Message msg = new Message();
+        msg.setData(bundle);
+        handler.sendMessage(msg);
+    }
+
+    public interface GetAlbumsCallback {
+        void onSuccess(GroupItem group);
+
+        void onError(String error);
+
+        default void finish(){}
     }
 
 
@@ -492,8 +650,7 @@ public class VKVideo {
                                                 userName = (profiles.getJSONObject(j).has("first_name") ? profiles.getJSONObject(j).getString("first_name") : "") + " " + (profiles.getJSONObject(j).has("last_name") ? profiles.getJSONObject(j).getString("last_name") : "");
                                             }
                                         }
-                                    }
-                                    else {
+                                    } else {
                                         // Группа
                                         int countGroups = groups.length();
                                         for (int j = 0; j < countGroups; j++) {
@@ -1263,5 +1420,198 @@ public class VKVideo {
 
 
     }
+
+
+    public static class PlaylistGroupItem implements Serializable {
+
+        public int getCount() {
+            return count;
+        }
+
+        public long getUpdatedTime() {
+            return updated_time;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public int getOwnerId() {
+            return owner_id;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public ArrayList<VideoItem.Image> getImages() {
+            return images;
+        }
+
+        public boolean isIsSubscribed() {
+            return is_subscribed;
+        }
+
+        public int getCanView() {
+            return can_view;
+        }
+
+        public String getFirstVideoId() {
+            return first_video_id;
+        }
+
+        public int getCanSubscribe() {
+            return can_subscribe;
+        }
+
+        public String getResponseType() {
+            return response_type;
+        }
+
+
+        private int count = 0; // Кол-во видео внутри плейлиста
+        private long updated_time = 0; // Последнее обновление плелиста
+        private int id = 0; // ID плейлиста
+        private final int owner_id; // Владелец плейлиста
+        private final String title; // Название плейлиста
+        private ArrayList<VideoItem.Image> images = new ArrayList<>();   // Изображения группы
+        private boolean is_subscribed = false; // Подписан ли на плейлист
+        private int can_view = 0;        // Можно ли просмотреть
+        private String first_video_id = "";  // ownerID_videoID ID первого видео
+        private int can_subscribe = 0;   // можно ли подписаться на обновления плейлиста
+        private String response_type = "";   // Тип ответа. min / full
+
+        public PlaylistGroupItem(Builder builder) {
+            this.count = builder.count;
+            this.updated_time = builder.updated_time;
+            this.id = builder.id;
+            this.owner_id = builder.owner_id;
+            this.title = builder.title;
+            this.images = builder.images;
+            this.is_subscribed = builder.is_subscribed;
+            this.can_view = builder.can_view;
+            this.first_video_id = builder.first_video_id;
+            this.can_subscribe = builder.can_subscribe;
+            this.response_type = builder.responseType;
+        }
+
+        public static class Builder implements Serializable {
+            private int count = 0; // Кол-во видео внутри плейлиста
+            private long updated_time = 0; // Последнее обновление плелиста
+            private int id = 0; // ID плейлиста
+            private int owner_id; // Владелец плейлиста
+            private String title; // Название плейлиста
+            private ArrayList<VideoItem.Image> images = new ArrayList<>();   // Изображения группы
+            private boolean is_subscribed = false; // Подписан ли на плейлист
+            private int can_view = 0;        // Можно ли просмотреть
+            private String first_video_id = "";  // ownerID_videoID ID первого видео
+            private int can_subscribe = 0;   // можно ли подписаться на обновления плейлиста
+            private String responseType = "";   // Тип ответа. min / full
+
+            public void setResponseType(String response_type) {
+                this.responseType = response_type;
+            }
+
+            public void setCanSubscribe(int can_subscribe) {
+                this.can_subscribe = can_subscribe;
+            }
+
+            public void setFirstVideo_id(String first_video_id) {
+                this.first_video_id = first_video_id;
+            }
+
+            public void setCanView(int can_view) {
+                this.can_view = can_view;
+            }
+
+            public void setIsSubscribed(boolean is_subscribed) {
+                this.is_subscribed = is_subscribed;
+            }
+
+            public void setImages(ArrayList<VideoItem.Image> images) {
+                this.images = images;
+            }
+
+            public void setTitle(String title) {
+                this.title = title;
+            }
+
+            public void setOwnerId(int owner_id) {
+                this.owner_id = owner_id;
+            }
+
+            public void setId(int id) {
+                this.id = id;
+            }
+
+            public void setUpdatedTime(long updated_time) {
+                this.updated_time = updated_time;
+            }
+
+            public void setCount(int count) {
+                this.count = count;
+            }
+
+            public PlaylistGroupItem build() {
+                return new PlaylistGroupItem(this);
+            }
+        }
+
+    }
+
+    public static class GroupItem implements Serializable {
+        private final ArrayList<PlaylistGroupItem> playLists;
+        private final ArrayList<VideoItem> videoItems;
+        private final String name;
+        private final String screen_name;
+        private final String photo_100;
+        private final int countVideo;
+        private final int is_closed;
+
+        public String getPhoto_100() {
+            return photo_100;
+        }
+
+        public int getIs_closed() {
+            return is_closed;
+        }
+
+        public String getScreenName() {
+            return screen_name;
+        }
+
+        public int getCountVideo() {
+            return countVideo;
+        }
+
+        public String getTitleGroup() {
+            return name;
+        }
+
+        public ArrayList<VideoItem> getVideoItems() {
+            return videoItems;
+        }
+
+        public ArrayList<PlaylistGroupItem> getPlayLists() {
+            return playLists;
+        }
+
+        public GroupItem(ArrayList<PlaylistGroupItem> playLists,
+                         ArrayList<VideoItem> videoItems,
+                         String name,
+                         String screen_name,
+                         int countVideo,
+                         int is_closed, String photo_100) {
+            this.photo_100 = photo_100;
+            this.is_closed = is_closed;
+            this.screen_name = screen_name;
+            this.playLists = playLists;
+            this.videoItems = videoItems;
+            this.name = name;
+            this.countVideo = countVideo;
+        }
+
+    }
+
 
 }

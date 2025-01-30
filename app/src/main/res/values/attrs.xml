@@ -13,7 +13,7 @@
     <!--Используется на странице поиска. на элементе Tabs. Нижняя подсветка выбранного элемента (окна)!-->
     <attr name="appbarSelectableItemBackground" format="color"/>
 
-    <!--Используется на странице Фильма!-->
+    <!--Используется на странице Фильма. и во многих других местах. !-->
     <attr name="IconTintColorDayNightTheme" format="color"/>
 
     <!--Используется на странице Фильма! где вместо постера вначале выскакивает эмоция (PlaceHolder)-->
@@ -22,5 +22,7 @@
     <attr name="IconColorBaseDarkWhite" format="color"/>
 
     <attr name="HintDayNightTheme" format="color"/>
+
+    <attr name="FloatingActionButtonTheme" format="color"/>
 
 </resources>

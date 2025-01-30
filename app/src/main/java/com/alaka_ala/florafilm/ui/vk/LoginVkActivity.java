@@ -41,8 +41,8 @@ import okhttp3.Response;
 public class LoginVkActivity extends AppCompatActivity {
     private ActivityLoginVkBinding binding;
     private WebView webViewLoginVk;
-    private static final String CLIENT_ID = "6121396"; //  6287487 (VK.COM)   | 6121396 (VK ADMIN)  | KATE (2685278)
-    private static final String SCOPE = "1073737727"; // Полный доступ
+    private static final String CLIENT_ID = "6287487"; //  6287487 (VK.COM)   | 6121396 (VK ADMIN)  | KATE (2685278)
+    private static final String SCOPE = "video,audio,offline"; //   // 1073737727 - Полный доступ
     private static String baseURl;
     public static final String USER_AGENT = "VKAndroidApp/5.52-4543 (Android 5.1.1; SDK 22; x86_64; unknown Android SDK built for x86_64; en; 320x240)";
     public static final String USER_AGENT_YA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 YaBrowser/24.12.0.0 Safari/537.36";
@@ -66,8 +66,8 @@ public class LoginVkActivity extends AppCompatActivity {
         // Запрет открытия новых страниц в браузере
         webViewLoginVk.getSettings().setJavaScriptCanOpenWindowsAutomatically(false);
         Map<String, String> headers = new HashMap<>();
-        headers.put("User-Agent", USER_AGENT_YA);
-        baseURl = "https://oauth.vk.com/authorize?&redirect_uri=" + REDIRECT_URI + "&client_id=" + CLIENT_ID + "&scope=" + SCOPE + "&response_type=token&v=5.95&revoke=1&&display=page";
+        headers.put("User-Agent", USER_AGENT);
+        baseURl = "https://oauth.vk.com/authorize?&redirect_uri=" + REDIRECT_URI + "&client_id=" + CLIENT_ID + "&scope=" + SCOPE + "&response_type=token&v=5.95&revoke=1&display=page";
 
         webViewLoginVk.setWebViewClient(new WebViewClient() {
             @Override
@@ -87,7 +87,6 @@ public class LoginVkActivity extends AppCompatActivity {
                 System.err.println("Error loading page: " + error.getDescription());
             }
         });
-
 
         webViewLoginVk.loadUrl(baseURl, headers);
 

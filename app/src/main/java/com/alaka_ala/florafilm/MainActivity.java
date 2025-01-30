@@ -225,7 +225,10 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void findError(String error) {
-                new MaterialAlertDialogBuilder(MainActivity.this).setMessage(error).show();
+                if (!error.startsWith("#3")) {
+                    Snackbar.make(binding.getRoot(), error, Snackbar.LENGTH_SHORT).show();
+                }
+
             }
         });
 
@@ -279,7 +282,7 @@ public class MainActivity extends AppCompatActivity {
                 popupMenu.getMenuInflater().inflate(R.menu.navigation_app, popupMenu.getMenu());
                 Menu menu = popupMenu.getMenu();
                 popupMenu.setForceShowIcon(true);
-                menu.add("Скрыть кнопку").setIcon(R.drawable.rounded_hide_source_24);;
+                menu.add("Скрыть кнопку").setIcon(R.drawable.rounded_hide_source_24);
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
@@ -292,6 +295,19 @@ public class MainActivity extends AppCompatActivity {
                             case "Настройки":
                                 navController.navigate(R.id.settingsAppFragment);
                                 return true;
+                            case "Главная":
+                                navController.navigate(R.id.homePageFragment);
+                                return true;
+                            case "Поиск":
+                                navController.navigate(R.id.searchFragment);
+                                return true;
+                            case "Избранное":
+                                navController.navigate(R.id.favoriteFragment);
+                                return true;
+                            case "Просмотренные":
+                                navController.navigate(R.id.viewedFragment);
+                                return true;
+
                         }
                         return false;
                     }
@@ -303,7 +319,6 @@ public class MainActivity extends AppCompatActivity {
             public void onDoubleClick(View view, MotionEvent e) {
                 Toast.makeText(MainActivity.this, "Двойной клик", Toast.LENGTH_SHORT).show();
             }
-
 
 
         });
@@ -357,6 +372,7 @@ public class MainActivity extends AppCompatActivity {
 
     private interface CallbackFullscreenAppMode {
         void onFullscreenAppMode(boolean fullScreen);
+
         void onHideAppBars(boolean hide);
     }
 

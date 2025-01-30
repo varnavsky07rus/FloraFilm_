@@ -15,5 +15,6 @@
         <item name="IconColorSadEmotion">#0B0B0B</item>
         <item name="IconColorBaseDarkWhite">@color/white</item>
         <item name="HintDayNightTheme">@color/hintNight</item>
+        <item name="FloatingActionButtonTheme">@color/floatActionButtonBlack</item>
     </style>
 </resources>

@@ -6,7 +6,8 @@
     <!-- Цвета темы MaterialSwitch в Settings-->
     <color name="thumbTint">#E6E6E6</color>
     <color name="trackTint">#2B2A2E</color>
-    <color name="floatActionButton">#818181</color>
+    <color name="floatActionButtonWhite">#E2E2E2</color>
+    <color name="floatActionButtonBlack">#141414</color>
     <!--########################## -->
     <color name="red">#FF2B2B</color>
 

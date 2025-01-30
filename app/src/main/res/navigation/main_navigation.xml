@@ -49,4 +49,9 @@
         android:id="@+id/VKCommentsFragment"
         android:name="com.alaka_ala.florafilm.ui.vk.ui.comments.VKCommentsFragment"
         android:label="Комментарии" />
+    <fragment
+        android:id="@+id/VKGroupsFragment"
+        android:name="com.alaka_ala.florafilm.ui.vk.ui.groups.VKGroupsFragment"
+        android:label="VK Группы"
+        tools:layout="@layout/fragment_v_k_groups" />
 </navigation>

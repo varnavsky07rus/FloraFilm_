@@ -70,11 +70,12 @@
 
                     <TextView
                         android:id="@+id/textView18"
-                        android:layout_width="wrap_content"
+                        android:layout_width="75dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginEnd="8dp"
                         android:layout_weight="1"
+                        android:gravity="end"
                         android:text="Заново"
                         android:textColor="@color/white" />
 
@@ -109,11 +110,12 @@
 
                     <TextView
                         android:id="@+id/textView19"
-                        android:layout_width="wrap_content"
+                        android:layout_width="75dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginStart="8dp"
                         android:layout_weight="1"
+                        android:gravity="start"
                         android:text="Смотреть"
                         android:textColor="@color/white" />
                 </LinearLayout>

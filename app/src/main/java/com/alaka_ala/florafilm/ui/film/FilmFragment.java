@@ -21,13 +21,7 @@ import android.widget.TextView;
 
 import com.alaka_ala.florafilm.R;
 import com.alaka_ala.florafilm.databinding.FragmentFilmBinding;
-import com.alaka_ala.florafilm.sys.hdvb.HDVB;
-import com.alaka_ala.florafilm.sys.hdvb.HDVBSelector;
-import com.alaka_ala.florafilm.sys.hdvb.HDVBalancer;
-import com.alaka_ala.florafilm.sys.hdvb.models.HDVBFilm;
-import com.alaka_ala.florafilm.sys.hdvb.models.HDVBSerial;
 import com.alaka_ala.florafilm.sys.kinovibe.KinoVibe;
-import com.alaka_ala.florafilm.sys.kp_api.FilmTrailer;
 import com.alaka_ala.florafilm.sys.kp_api.ItemFilmInfo;
 import com.alaka_ala.florafilm.sys.kp_api.KinopoiskAPI;
 import com.alaka_ala.florafilm.sys.kp_api.ListFilmItem;
@@ -38,14 +32,12 @@ import com.alaka_ala.florafilm.sys.vibix.VibixSelector;
 import com.alaka_ala.florafilm.ui.film.vk_pager.AdapterViewPager2VkFiles;
 import com.alaka_ala.florafilm.ui.player.exo.models.EPData;
 import com.alaka_ala.florafilm.ui.vk.AccountManager;
-import com.alaka_ala.florafilm.ui.vk.LoginVkActivity;
 import com.alaka_ala.florafilm.ui.vk.parser.VKVideo;
 import com.google.android.material.snackbar.Snackbar;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class FilmFragment extends Fragment implements Vibix.ConnectionVibix {
@@ -387,7 +379,7 @@ public class FilmFragment extends Fragment implements Vibix.ConnectionVibix {
         ImageView imageViewArrowFiles = layout_film_files.findViewById(R.id.imageViewArrowFiles);
         TextView textViewTitleBalancer = layout_film_files.findViewById(R.id.textViewTitleBalancer);
         textViewTitleBalancer.setText("[VIBIX]");
-        LinearLayout root = layout_film_files.findViewById(R.id.linearLayoutRoot);
+        LinearLayout root = layout_film_files.findViewById(R.id.linearLayoutRootGroups);
 
         linearLayoutTitleFiles.setOnClickListener(new View.OnClickListener() {
             boolean isAnimate = false;
@@ -457,7 +449,7 @@ public class FilmFragment extends Fragment implements Vibix.ConnectionVibix {
         ImageView imageViewArrowFiles = layout_film_files.findViewById(R.id.imageViewArrowFiles);
         TextView textViewTitleBalancer = layout_film_files.findViewById(R.id.textViewTitleBalancer);
         textViewTitleBalancer.setText("[VIBIX]");
-        LinearLayout root = layout_film_files.findViewById(R.id.linearLayoutRoot);
+        LinearLayout root = layout_film_files.findViewById(R.id.linearLayoutRootGroups);
 
         linearLayoutTitleFiles.setOnClickListener(new View.OnClickListener() {
             boolean isAnimate = false;
@@ -521,14 +513,14 @@ public class FilmFragment extends Fragment implements Vibix.ConnectionVibix {
                 }
             }).show();
         } else {
-            if (getContext() == null) return;
+            if (getContext() != null) return;
             LayoutInflater inflater = getLayoutInflater();
             View layout_film_files = inflater.inflate(R.layout.layout_film_files, null, false);
             LinearLayout linearLayoutTitleFiles = layout_film_files.findViewById(R.id.linearLayoutTitleFiles);
             ImageView imageViewArrowFiles = layout_film_files.findViewById(R.id.imageViewArrowFiles);
             TextView textViewTitleBalancer = layout_film_files.findViewById(R.id.textViewTitleBalancer);
             textViewTitleBalancer.setText("[VIBIX]");
-            LinearLayout root = layout_film_files.findViewById(R.id.linearLayoutRoot);
+            LinearLayout root = layout_film_files.findViewById(R.id.linearLayoutRootGroups);
             final int[] countTapTitle = {0};
             linearLayoutTitleFiles.setOnClickListener(new View.OnClickListener() {
                 @Override

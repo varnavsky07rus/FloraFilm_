@@ -90,21 +90,16 @@ public class UpdateApp {
                                 msg.setData(bundle);
                                 handler.sendMessage(msg);
                             } else {
-                                Bundle bundle = new Bundle();
-                                bundle.putString("status", ERROR);
-                                bundle.putString("error", "Нет новых обновлений");
-                                Message msg = new Message();
-                                msg.setData(bundle);
-                                handler.sendMessage(msg);
+                                onFailure(call, new IOException("#3 Нет новых обновлений"));
                             }
 
 
                         } catch (JSONException e) {
-                            onFailure(call, new IOException("Ошибка создания/парсинга JSONObject | [metadata_json]"));
+                            onFailure(call, new IOException("#2 Ошибка создания/парсинга JSONObject | [metadata_json]"));
                         }
                     }
                 } else {
-                    onFailure(call, new IOException("Ошибка поиска обновлений | [metadata_json]"));
+                    onFailure(call, new IOException("#1 Ошибка поиска обновлений | [metadata_json]"));
                 }
             }
         });
