@@ -4,9 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:backgroundTintMode="add"
     android:focusable="auto"
-    app:cardBackgroundColor="#00FFFFFF"
-    app:strokeColor="#00424242">
+    app:cardBackgroundColor="?attr/MainBacgroundAppTheme"
+    app:strokeColor="#00000000">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -22,6 +23,7 @@
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
             android:clipChildren="false"
+            app:cardBackgroundColor="?attr/MainBacgroundAppTheme"
             app:cardCornerRadius="16dp">
 
             <VideoView

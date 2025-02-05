@@ -1,8 +1,10 @@
 package com.alaka_ala.florafilm.ui.player.exo;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -18,8 +20,11 @@ import com.alaka_ala.florafilm.ui.player.exo.models.EPData;
 import com.alaka_ala.florafilm.ui.vk.LoginVkActivity;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.PlaybackException;
+import com.google.android.exoplayer2.analytics.AnalyticsListener;
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
@@ -62,6 +67,9 @@ public class ExoActivity extends AppCompatActivity {
 
         if (TYPE_CONTENT.equals("FILM")) {
             String currentUrl = film.getTranslations().get(indexTranslation).getVideoData().get(indexQuality).getValue();
+            if (currentUrl.isEmpty()) {
+                Toast.makeText(this, "Что-то пошло не так...", Toast.LENGTH_SHORT).show();
+            }
             initializePlayer(currentUrl);
         } else if (TYPE_CONTENT.equals("SERIAL")) {
             ArrayList<String> currentUrls = getEpisodes();
@@ -72,6 +80,7 @@ public class ExoActivity extends AppCompatActivity {
 
     private @NonNull ArrayList<String> getEpisodes() {
         ArrayList<String> currentUrls = new ArrayList<>();
+        if (serial == null) return currentUrls;
 
         for (int i = 0; i < serial.getSeasons().get(indexSeason).getEpisodes().size(); i++) {
             // парсим все серии выбранного сезона
@@ -87,11 +96,23 @@ public class ExoActivity extends AppCompatActivity {
         DefaultHttpDataSource.Factory httpDataSourceFactory = new DefaultHttpDataSource.Factory();
         // Создаем RequestProperties и устанавливаем User-Agent
         DefaultHttpDataSource.RequestProperties requestProperties = new DefaultHttpDataSource.RequestProperties();
-        requestProperties.set("User-Agent", LoginVkActivity.USER_AGENT_KATE); // Замените на ваш User-Agent
+        requestProperties.set("User-Agent", LoginVkActivity.USER_AGENT); // Замените на ваш User-Agent
         // Устанавливаем RequestProperties в httpDataSourceFactory
         httpDataSourceFactory.setDefaultRequestProperties(requestProperties.getSnapshot());
         player = new ExoPlayer.Builder(this).setMediaSourceFactory(new DefaultMediaSourceFactory(httpDataSourceFactory)).build();
         binding.playerView.setPlayer(player);
+        player.addAnalyticsListener(new AnalyticsListener() {
+            @Override
+            public void onPlayerError(EventTime eventTime, PlaybackException error) {
+                AnalyticsListener.super.onPlayerError(eventTime, error);
+                new MaterialAlertDialogBuilder(ExoActivity.this).setTitle("Ошибка").setMessage(error.getMessage()).setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ExoActivity.this.finish();
+                    }
+                }).show();
+            }
+        });
     }
 
     private void initializePlayer(String videoUrl) {

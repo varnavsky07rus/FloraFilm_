@@ -16,5 +16,6 @@
         <item name="IconColorBaseDarkWhite">@color/white</item>
         <item name="HintDayNightTheme">@color/hintNight</item>
         <item name="FloatingActionButtonTheme">@color/floatActionButtonBlack</item>
+        <item name="RippleColorTheme">@color/rippleColorDarkTheme</item>
     </style>
 </resources>

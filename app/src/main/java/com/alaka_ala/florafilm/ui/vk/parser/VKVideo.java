@@ -17,6 +17,8 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -31,6 +33,7 @@ public class VKVideo {
     public static final String METHOD_VIDEO_SEARCH = "video.search";
     public static final String METHOD_VIDEO_COMMENTS = "video.getComments";
     public static final String METHOD_VIDEO_GET_ALBUMS = "video.getAlbums";
+    public static final String METHOD_VIDEO_GET_ALBUM_BY_ID = "video.getAlbumById";
 
     public static String DEF_USER_AGENT;
     private final String ACCESS_TOKEN;
@@ -45,15 +48,14 @@ public class VKVideo {
 
     public VKVideo(String accessToken) {
         ACCESS_TOKEN = accessToken;
-        DEF_USER_AGENT = LoginVkActivity.USER_AGENT_KATE;
-
+        DEF_USER_AGENT = LoginVkActivity.USER_AGENT;
     }
 
 
     /**
      * Получение всех видео группы по id группы (По умолчанию возвращает 99 фильмов из группы)
      */
-    public void getVideosGroup(String group_id, int offset, GetAllVideosGroupCallback gavgc) {
+    public void getVideosGroup(String owner_id, int offset, GetAllVideosGroupCallback gavgc) {
         Handler handler = new Handler(new Handler.Callback() {
             @Override
             public boolean handleMessage(@NonNull Message msg) {
@@ -68,7 +70,7 @@ public class VKVideo {
                 return false;
             }
         });
-        String url = DEF_HOST_API + METHOD_VIDEO_GET + "?owner_id=" + group_id + "&access_token=" + ACCESS_TOKEN + "&v=" + VERSION_API;
+        String url = DEF_HOST_API + METHOD_VIDEO_GET + "?owner_id=" + owner_id  + "&offset" + offset +  "&access_token=" + ACCESS_TOKEN + "&v=" + VERSION_API;
         OkHttpClient okHttpClient = new OkHttpClient();
         Request.Builder req = new Request.Builder();
         req.url(url);
@@ -125,14 +127,89 @@ public class VKVideo {
     }
 
 
-    public void getAlbums(String owner_id, int offset, GetAlbumsCallback callback) {
+
+    /**
+     * Получение видео на отдельный плейлист группы по id группы (По умолчанию возвращает 99 фильмов из группы)
+     */
+    public void getVideosGroup(String owner_id, String album_id, int offset, GetAllVideosGroupCallback gavgc) {
         Handler handler = new Handler(new Handler.Callback() {
             @Override
             public boolean handleMessage(@NonNull Message msg) {
                 Bundle bundle = msg.getData();
                 boolean ok = bundle.getBoolean("ok", false);
                 if (ok) {
+                    ArrayList<VideoItem> videos = (ArrayList<VideoItem>) bundle.getSerializable("videos");
+                    gavgc.onSuccess(videos);
+                } else {
+                    gavgc.onError(new Exception("Ошибка получения видео"));
+                }
+                return false;
+            }
+        });
+        String url = DEF_HOST_API + METHOD_VIDEO_GET + "?owner_id=" + owner_id + "&album_id=" + album_id + "&offset=" + offset + "&access_token=" + ACCESS_TOKEN + "&v=" + VERSION_API;
+        OkHttpClient okHttpClient = new OkHttpClient();
+        Request.Builder req = new Request.Builder();
+        req.url(url);
+        req.addHeader("User-Agent", DEF_USER_AGENT);
+        req.addHeader("Accept-Language", "ru,en;q=0.9");
+        okHttpClient.newCall(req.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Bundle bundle = new Bundle();
+                bundle.putBoolean("ok", false);
+                bundle.putSerializable("videos", null);
+                Message msg = new Message();
+                msg.setData(bundle);
+                handler.sendMessage(msg);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                assert response.body() != null;
+                String body = response.body().string();
+                if (response.isSuccessful()) {
+                    if (JsonParser.parseString(body).isJsonObject()) {
+                        try {
+                            JSONObject jsonBody = new JSONObject(body);
+                            jsonBody = jsonBody.getJSONObject("response");
+                            JSONArray items = jsonBody.getJSONArray("items");
+                            ArrayList<VideoItem> videos = getVideoItems(items);
+
+                            Bundle bundle = new Bundle();
+                            bundle.putBoolean("ok", true);
+                            bundle.putSerializable("videos", videos);
+                            Message msg = new Message();
+                            msg.setData(bundle);
+                            handler.sendMessage(msg);
+
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            onFailure(call, new IOException("Ошибка создания объекта JSONObject: " + e.getMessage()));
+                        }
+                    }
+                } else {
+                    onFailure(call, new IOException("Ошибка выполнения запроса, ответ сервера: " + body));
+                }
+            }
+        });
+
+    }
+
+
+
+    private static final Map<Integer, GroupItem> groupes = new HashMap<>();
+    // Получение плейлистов группы (если открыты)
+    public void getAlbums(int owner_id, int offset, GetAlbumsCallback callback) {
+
+        Handler handler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
+            @Override
+            public boolean handleMessage(@NonNull Message msg) {
+                Bundle bundle = msg.getData();
+                boolean ok = bundle.getBoolean("ok", false);
+                if (ok) {
                     GroupItem group = (GroupItem) bundle.getSerializable("group");
+                    groupes.put(owner_id, group);
                     callback.onSuccess(group);
                     callback.finish();
                 } else {
@@ -142,6 +219,15 @@ public class VKVideo {
                 return false;
             }
         });
+        if (groupes.containsKey(owner_id)) {
+            Bundle bundle = new Bundle();
+            bundle.putBoolean("ok", true);
+            bundle.putSerializable("group", groupes.get(owner_id));
+            Message msg = new Message();
+            msg.setData(bundle);
+            handler.sendMessage(msg);
+            return;
+        }
         int count = 100;
         int extended = 1;
         String url = DEF_HOST_API + METHOD_VIDEO_GET_ALBUMS + "?owner_id=" + owner_id + "&extended=" + extended + "&count=" + count + "&offset=" + offset + "&access_token=" + ACCESS_TOKEN + "&v=" + VERSION_API;
@@ -219,10 +305,10 @@ public class VKVideo {
                                                 JSONObject group = jsonBody.has("groups") ? jsonBody.getJSONArray("groups").getJSONObject(0) : new JSONObject();
 
                                                 int count = jsonBody.has("count") ? jsonBody.getInt("count") : 0;
-                                                int is_closed = group.getInt("is_closed");
-                                                String name = group.getString("name");
-                                                String photo_100 = group.getString("photo_100");
-                                                String screen_name = group.getString("screen_name");
+                                                int is_closed = group.has("is_closed") ? group.getInt("is_closed") : 0;
+                                                String name = group.has("name") ? group.getString("name") : "";
+                                                String photo_100 = group.has("photo_100") ? group.getString("photo_100") : "";
+                                                String screen_name = group.has("screen_name") ? group.getString("screen_name") : "";
 
                                                 ArrayList<VideoItem> videos = getVideoItems(items);
 
@@ -258,6 +344,14 @@ public class VKVideo {
         });
 
 
+    }
+
+
+
+    public interface GetVideosByGroupIdCallback {
+        void onSuccess(ArrayList<VideoItem> videos);
+
+        void onError(Exception e);
     }
 
     private static @NonNull ArrayList<VideoItem> getVideoItems(JSONArray items) throws JSONException {
@@ -589,7 +683,7 @@ public class VKVideo {
      * Получение комментариев к видео
      */
     public void getCommentsVideo(String owner_id, String video_id, int offset, int count, GetCommentsVideoCallback gcv) {
-        Handler handler = new Handler(new Handler.Callback() {
+        Handler handler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
             @Override
             public boolean handleMessage(@NonNull Message msg) {
                 Bundle bundle = msg.getData();
@@ -740,9 +834,7 @@ public class VKVideo {
     }
 
 
-    /**
-     * Базовая модель видео элемента
-     */
+
     public static class VideoItem implements Serializable {
         public static class File implements Serializable {
             public String getMp4_144() {
@@ -1420,7 +1512,6 @@ public class VKVideo {
 
 
     }
-
 
     public static class PlaylistGroupItem implements Serializable {
 

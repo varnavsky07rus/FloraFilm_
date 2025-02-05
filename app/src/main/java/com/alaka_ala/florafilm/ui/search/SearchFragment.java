@@ -10,6 +10,9 @@ import androidx.viewpager2.widget.ViewPager2;
 import android.os.Handler;
 import android.os.Message;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -34,7 +37,6 @@ public class SearchFragment extends Fragment {
     private TabLayout tabs;
     private ViewPager2 viewPgerSearchTab;
     private AdapterSearchViewPager adapter;
-    private SearchView serchView;
 
     private KinopoiskAPI kinopoiskAPI;
     private Map<String, ListFilmItem> favoriteList = new HashMap<>();
@@ -51,6 +53,7 @@ public class SearchFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = FragmentSearchBinding.inflate(inflater, container, false);
+        setHasOptionsMenu(true);
         kinopoiskAPI = new KinopoiskAPI(getResources().getString(R.string.api_key_kinopoisk));
         utils = new UtilsFavoriteAndViewFilm(getContext());
         settingsApp = new SettingsApp(getContext());
@@ -63,13 +66,6 @@ public class SearchFragment extends Fragment {
         if (isAnimateViewPager) {
             viewPgerSearchTab.setPageTransformer(new AdapterSearchViewPager.WheelPageTransformer());
         }
-        serchView = binding.serchView;
-        serchView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                serchView.setIconified(false);
-            }
-        });
 
 
         notifyDataSearchChanged = new NotifyDataSearchChanged() {
@@ -91,36 +87,6 @@ public class SearchFragment extends Fragment {
             }
         };
 
-        serchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                currentQueryText = query;
-                if (viewPgerSearchTab.getCurrentItem() == 0) {
-                    searchGlobal(query);
-                    return false;
-                } else if (viewPgerSearchTab.getCurrentItem() == 1) {
-                    searchFavoriteQuery(query);
-                    return false;
-                } else if (viewPgerSearchTab.getCurrentItem() == 2) {
-                    searchViewedQuery(query);
-                    return false;
-                }
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                currentQueryText = newText;
-                if (viewPgerSearchTab.getCurrentItem() == 1) {
-                    searchFavoriteQuery(newText);
-                    return false;
-                } else if (viewPgerSearchTab.getCurrentItem() == 2) {
-                    searchViewedQuery(newText);
-                    return false;
-                }
-                return false;
-            }
-        });
 
         viewPgerSearchTab.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -128,7 +94,9 @@ public class SearchFragment extends Fragment {
                 super.onPageScrolled(position, positionOffset, positionOffsetPixels);
                 tabs.setScrollPosition(position, positionOffset, false);
             }
+
             private int positionPage = 0;
+
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
@@ -193,6 +161,7 @@ public class SearchFragment extends Fragment {
     }
 
     private Collection collectionResultGlobal;
+
     private void searchGlobal(String query) {
         kinopoiskAPI.getListSearch(query, 1, new KinopoiskAPI.RequestCallbackCollection() {
             @Override
@@ -255,40 +224,96 @@ public class SearchFragment extends Fragment {
         return matchPercentage >= 70;
     }
 
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        SearchView searchView = new SearchView(getContext());
+        searchView.setQueryHint("Поиск..."); // Устанавливаем подсказку
+        searchView.setIconified(false);
 
-    /**Интерфейс реализации которого будет вызывать {@link SearchFragment} методом
-     * {@link SearchFragment#setSearchListenerResult(SearchFragment.SearchListenerResult searchListenerResult)}*/
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                currentQueryText = query;
+                if (viewPgerSearchTab.getCurrentItem() == 0) {
+                    searchGlobal(query);
+                    return false;
+                } else if (viewPgerSearchTab.getCurrentItem() == 1) {
+                    searchFavoriteQuery(query);
+                    return false;
+                } else if (viewPgerSearchTab.getCurrentItem() == 2) {
+                    searchViewedQuery(query);
+                    return false;
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                currentQueryText = newText;
+                if (viewPgerSearchTab.getCurrentItem() == 1) {
+                    searchFavoriteQuery(newText);
+                    return false;
+                } else if (viewPgerSearchTab.getCurrentItem() == 2) {
+                    searchViewedQuery(newText);
+                    return false;
+                }
+                return false;
+            }
+        });
+
+        menu.add("Поиск")
+                .setIcon(R.drawable.rounded_video_search_24)
+                .setActionView(searchView)
+                .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+    }
+
+    /**
+     * Интерфейс реализации которого будет вызывать {@link SearchFragment} методом
+     * {@link SearchFragment#setSearchListenerResult(SearchFragment.SearchListenerResult searchListenerResult)}
+     */
     public interface SearchListenerResult {
         void result(String query, Collection collection);
     }
-    /**Интерфейс реализации которого будет вызывать {@link SearchFragment} методом
-     * {@link SearchFragment#setSearchListenerResult(SearchFragment.SearchListenerResult searchListenerResult)}*/
+
+    /**
+     * Интерфейс реализации которого будет вызывать {@link SearchFragment} методом
+     * {@link SearchFragment#setSearchListenerResult(SearchFragment.SearchListenerResult searchListenerResult)}
+     */
     private static SearchListenerResult searchListenerResult;
 
-    /**Устанавливает {@link SearchListenerResult} для {@link SearchFragment},
+    /**
+     * Устанавливает {@link SearchListenerResult} для {@link SearchFragment},
      * данный метод можно использовать как локально во фрагменте, так и добавить в fragment
      * через implementation но после указать на контекст т.е. -> this |
-     * в {@link SearchFragment#setSearchListenerResult(SearchFragment.SearchListenerResult searchListenerResult)}*/
+     * в {@link SearchFragment#setSearchListenerResult(SearchFragment.SearchListenerResult searchListenerResult)}
+     */
     public static void setSearchListenerResult(SearchListenerResult searchListenerResult) {
         if (searchListenerResult == null) return;
         SearchFragment.searchListenerResult = searchListenerResult;
     }
-    /**Данный метод предназначен исключительно для {@link SearchFragment},
-     * что бы передать результат поиска в один из фрагментов ViewPager2 */
+
+    /**
+     * Данный метод предназначен исключительно для {@link SearchFragment},
+     * что бы передать результат поиска в один из фрагментов ViewPager2
+     */
     private void publishResult(String query, Collection collection) {
         if (searchListenerResult == null) return;
         searchListenerResult.result(query, collection);
     }
 
 
-
     private interface NotifyDataSearchChanged {
         void notifyDataChanged(boolean isAdd, int whatList, ListFilmItem item);
     }
+
     private static NotifyDataSearchChanged notifyDataSearchChanged;
-    /**Когда в одном из фрагментов происходит одно из действий: добавление или удаление в просмотренные или избранные
+
+    /**
+     * Когда в одном из фрагментов происходит одно из действий: добавление или удаление в просмотренные или избранные
      * то данный метод обновит данные внутри {@link SearchFragment} для дальнейшей работы с ними (или без них)
-     * Данный метод вызывает внутри из фрагмента ViewPager2*/
+     * Данный метод вызывает внутри из фрагмента ViewPager2
+     */
     public static void onNotifyDataSearchChanged(boolean isAdd, int whatList, ListFilmItem item) {
         if (notifyDataSearchChanged == null) return;
         notifyDataSearchChanged.notifyDataChanged(isAdd, whatList, item);

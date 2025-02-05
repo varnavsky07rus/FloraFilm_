@@ -27,6 +27,7 @@ import com.alaka_ala.florafilm.sys.kp_api.KinopoiskAPI;
 import com.alaka_ala.florafilm.sys.kp_api.ListFilmItem;
 import com.alaka_ala.florafilm.sys.kp_api.ListStaffItem;
 import com.alaka_ala.florafilm.sys.utils.PersonsRecyclerAdapter;
+import com.alaka_ala.florafilm.sys.utils.UtilsFavoriteAndViewFilm;
 import com.alaka_ala.florafilm.sys.vibix.Vibix;
 import com.alaka_ala.florafilm.sys.vibix.VibixSelector;
 import com.alaka_ala.florafilm.ui.film.vk_pager.AdapterViewPager2VkFiles;
@@ -60,7 +61,7 @@ public class FilmFragment extends Fragment implements Vibix.ConnectionVibix {
     private KinoVibe kinoVibe;
     private VKVideo vkVideo;
     private LinearLayout linearLayoutContent;
-
+    private UtilsFavoriteAndViewFilm utilsFavoriteAndViewFilm;
     @SuppressLint("SetTextI18n")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -70,7 +71,7 @@ public class FilmFragment extends Fragment implements Vibix.ConnectionVibix {
         /*getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);*/
         linearLayoutContent = binding.linearLayoutContent;
-
+        utilsFavoriteAndViewFilm = new UtilsFavoriteAndViewFilm(getContext());
 
         bundle = getArguments();
         if (bundle == null) return binding.getRoot();

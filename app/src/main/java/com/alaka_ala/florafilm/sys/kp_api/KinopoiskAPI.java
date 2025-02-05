@@ -23,6 +23,7 @@ import static com.alaka_ala.florafilm.sys.kp_api.Collection.TITLE_VAMPIRE_THEME;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 
 import androidx.annotation.NonNull;
@@ -182,7 +183,7 @@ public class KinopoiskAPI {
     private void connect(String url, ConntectCallback callback) {
         countConnections++;
         previousCountConnections = countConnections;
-        Handler handler = new Handler(new Handler.Callback() {
+        Handler handler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
             @Override
             public boolean handleMessage(@NonNull Message msg) {
                 countConnections--;
@@ -270,7 +271,7 @@ public class KinopoiskAPI {
                     }
 
                 } catch (JSONException e) {
-                    throw new RuntimeException(e);
+                    onFailure(new IOException(e.getMessage()));
                 }
             }
 

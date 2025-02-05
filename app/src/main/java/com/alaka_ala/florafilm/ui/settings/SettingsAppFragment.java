@@ -44,15 +44,14 @@ public class SettingsAppFragment extends Fragment {
         settingsApp = new SettingsApp(getContext());
 
         // Скрыть показывать плавающую кнопку на главном экране использующуюся в MainActivity
-        MaterialSwitch switchVisibleFloatActionButtonMenu = binding.switchVisibleFloatActionButtonMenu;
-        switchVisibleFloatActionButtonMenu.setChecked(settingsApp.getParam(
-                SettingsApp.SettingsKeys.FLOAT_ACTION_BUTTON_MENU,
-                SettingsApp.SettingsDefsVal.VISIBLE_FLOAT_ACTION_BUTTON_MENU));
-        switchVisibleFloatActionButtonMenu.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        MaterialSwitch switchVisibleBlockNewsMedia = binding.switchVisibleBlockNewsMedia;
+        switchVisibleBlockNewsMedia.setChecked(settingsApp.getParam(
+                SettingsApp.SettingsKeys.BLOCK_NEWS_MEDIA,
+                SettingsApp.SettingsDefsVal.VISIBLE_BLOCK_NEWS_MEDIA));
+        switchVisibleBlockNewsMedia.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                settingsApp.saveParam(SettingsApp.SettingsKeys.FLOAT_ACTION_BUTTON_MENU, isChecked);
-                //MainActivity.setVisibilityFloatActionButtonMenu(isChecked);
+                settingsApp.saveParam(SettingsApp.SettingsKeys.BLOCK_NEWS_MEDIA, isChecked);
             }
         });
 
@@ -173,15 +172,4 @@ public class SettingsAppFragment extends Fragment {
     }
 
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        MainActivity.setVisibilityFloatActionButtonMenu(false);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        MainActivity.setVisibilityFloatActionButtonMenu(settingsApp.getParam(SettingsApp.SettingsKeys.FLOAT_ACTION_BUTTON_MENU, SettingsApp.SettingsDefsVal.VISIBLE_FLOAT_ACTION_BUTTON_MENU));
-    }
 }

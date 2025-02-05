@@ -6,7 +6,7 @@
     android:layout_height="wrap_content">
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/cardView"
+        android:id="@+id/cardViewMoreOptionsVkVideo"
         android:layout_width="125dp"
         android:layout_height="180dp"
         android:layout_marginStart="16dp"
@@ -16,6 +16,7 @@
         android:clickable="true"
         android:focusable="auto"
         android:foreground="?attr/selectableItemBackground"
+        app:cardBackgroundColor="?attr/MainBacgroundAppTheme"
         app:cardCornerRadius="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -28,7 +29,7 @@
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:scaleType="centerCrop"
-            app:srcCompat="@drawable/ic_launcher_foreground" />
+            app:srcCompat="@drawable/sad_rounded_square_emoticon" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -45,7 +46,9 @@
                 android:clickable="true"
                 android:foreground="?attr/selectableItemBackground"
                 android:tint="@color/white"
-                app:srcCompat="@drawable/rounded_bookmark_24" />
+                android:visibility="gone"
+                app:srcCompat="@drawable/rounded_bookmark_24"
+                tools:visibility="visible" />
 
             <ImageView
                 android:id="@+id/imageViewIsViewedBig"
@@ -55,7 +58,9 @@
                 android:clickable="true"
                 android:foreground="?attr/selectableItemBackground"
                 android:tint="@color/white"
-                app:srcCompat="@drawable/round_remove_red_eye_24" />
+                android:visibility="gone"
+                app:srcCompat="@drawable/round_remove_red_eye_24"
+                tools:visibility="visible" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

@@ -206,17 +206,17 @@
                                 android:layout_gravity="center"
                                 android:layout_marginEnd="24dp"
                                 android:layout_weight="0"
-                                android:src="@drawable/baseline_menu_24"
+                                android:src="@drawable/rounded_breaking_news_24"
                                 android:tint="?attr/SettingsIconTintTheme" />
 
                             <com.google.android.material.materialswitch.MaterialSwitch
-                                android:id="@+id/switchVisibleFloatActionButtonMenu"
+                                android:id="@+id/switchVisibleBlockNewsMedia"
                                 style="@style/SwitchMyTheme"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:layout_gravity="center"
                                 android:layout_weight="0.1"
-                                android:text="@string/settings_switchVisibleFloatActionButtonMenu_text"
+                                android:text="@string/settings_switchVisibleBlockNewsMedia"
                                 android:textSize="16sp" />
 
                         </LinearLayout>

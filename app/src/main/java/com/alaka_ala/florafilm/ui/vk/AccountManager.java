@@ -65,6 +65,9 @@ public class AccountManager extends LoginVkActivity {
 
     public static String getAccessToken(Context context) {
         Account account = getAccount(context);
-        return account.getAccessToken();
+        if (account != null) {
+            return account.getAccessToken();
+        }
+        return null;
     }
 }

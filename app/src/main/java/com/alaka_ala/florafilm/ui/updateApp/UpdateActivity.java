@@ -27,8 +27,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
-
-import at.huber.youtubeExtractor.BuildConfig;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 
 public class UpdateActivity extends AppCompatActivity {
     private ActivityUpdateBinding binding;
@@ -50,14 +50,16 @@ public class UpdateActivity extends AppCompatActivity {
 
         int newVersionCode = getIntent().getIntExtra("newVersionCode", 0);
         String newVersionName = getIntent().getStringExtra("newVersionName");
-        String description = getResources().getString(R.string.v1_0_6);
+
+        String descriptionAll = Arrays.toString(getResources().getTextArray(R.array.version_description)).replaceAll(",", "\n\n\n");
+        String[] description = getResources().getStringArray(R.array.version_description);
         String urlAPK = getIntent().getStringExtra("urlAPK");
         String urlMetadataJson = getIntent().getStringExtra("urlMetadataJson");
 
 
         binding.textView7.setText("Найдено обновление: " + newVersionName);
         binding.textView8.setText("Текущая версия: " + UpdateApp.getCurrentAppVersionName(this) + " (c" + UpdateApp.getCurrentAppVersionCode(this) + ")");
-        binding.textView11.setText("Описание:" + description);
+        binding.textView13.setText("Описание:" + description[0]);
 
         binding.buttonInstall.setOnClickListener(new View.OnClickListener() {
             @Override

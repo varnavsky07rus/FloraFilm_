@@ -92,10 +92,10 @@ public class SettingsApp {
          * Плавающая кнопка, которая открывает боковое меню, а при длительном нажатии открывает popUpMenu
          *
          * @_ Используется в MainActivity
-         * @ID floatActionButtonMenu
+         * @ID switchVisibleBlockNewsMedia
          * @DefsVal {@link SettingsDefsVal#}
          */
-        public static String FLOAT_ACTION_BUTTON_MENU = "0x00001";
+        public static String BLOCK_NEWS_MEDIA = "0x00001";
 
         public static String FULL_SCREEN_APP_MODE = "0x00002";
 
@@ -112,8 +112,8 @@ public class SettingsApp {
     }
 
     public static class SettingsDefsVal {
-        /**Стандартное значение настройки параметра {@link SettingsKeys#FLOAT_ACTION_BUTTON_MENU}*/
-        public static boolean VISIBLE_FLOAT_ACTION_BUTTON_MENU = true;
+        /**Стандартное значение настройки параметра {@link SettingsKeys#BLOCK_NEWS_MEDIA}*/
+        public static boolean VISIBLE_BLOCK_NEWS_MEDIA = false;
 
         /**Стандартное значение настройки параметра {@link SettingsKeys#FULL_SCREEN_APP_MODE}*/
         public static boolean FULL_SCREEN_APP_MODE = false;

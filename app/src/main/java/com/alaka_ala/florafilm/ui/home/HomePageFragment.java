@@ -15,15 +15,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alaka_ala.florafilm.R;
 import com.alaka_ala.florafilm.databinding.FragmentHomePageBinding;
+import com.alaka_ala.florafilm.sys.AsyncThreadBuilder;
 import com.alaka_ala.florafilm.sys.kp_api.Collection;
 import com.alaka_ala.florafilm.sys.kp_api.KinopoiskAPI;
 import com.alaka_ala.florafilm.sys.kp_api.NewsMedia;
@@ -69,10 +72,10 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
     private static UniversalRecyclerAdapter adapterComics;
     private static UniversalRecyclerAdapter adapterPopularOnlyMovies;
 
-    private MyRecyclerViewItemTouchListener onItemClickListenerPopularAll;
+    //private MyRecyclerViewItemTouchListener onItemClickListenerPopularAll;
     private MyRecyclerViewItemTouchListener onItemClickListenerTvShow250;
-    private MyRecyclerViewItemTouchListener onItemClickListenerMovie250;
-    private MyRecyclerViewItemTouchListener onItemClickListenerComics;
+    //private MyRecyclerViewItemTouchListener onItemClickListenerMovie250;
+    //private MyRecyclerViewItemTouchListener onItemClickListenerComics;
     private MyRecyclerViewItemTouchListener onItemClickListenerPopularOnlyMovies;
 
 
@@ -90,11 +93,11 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
     private boolean isAnimationInterface;
 
 
-    private TextView textViewMoreRvNewFilm; // Топ 250 фильмов
-    private TextView textViewMoreRvTopTvShow;   // Топ 250 сериалов
-    private TextView textViewMoreRvTopMovie;   // Топ 250 фильмов
-    private TextView textViewMoreRvTopMovieComics;   // По комиксам
-    private TextView textViewMoreRvNewOFilm;   // Популярные фильмы
+    private LinearLayout linearLayoutTopTvShow;   // Топ 250 сериалов
+    private LinearLayout linearLayoutNewOFilm;   // Популярные фильмы
+    private LinearLayout linearLayoutTopMovie;   // Топ 250 фильмов
+    private LinearLayout linearLayoutNewFilm; // Топ 250 новинок фильмов
+    private LinearLayout linearLayoutTopMovieComics;   // По комиксам
 
     private Chip genre19; // Семейные
     private Chip genre18; // Мультфильмы
@@ -154,29 +157,45 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
         rvPopularOnlyMovie = binding.layoutRvPopularMovie.rvHomeNewFilmPopularOFilm;
 
 
-        textViewMoreRvNewFilm = binding.layoutNewFilm.textViewMoreRvNewFilm;
-        textViewMoreRvTopTvShow = binding.layoutRvTopTvShow.textViewMoreRvTopTvShow;
-        textViewMoreRvTopMovie = binding.layoutRvTopMovie.textViewMoreRvTopMovie;
-        textViewMoreRvTopMovieComics = binding.layoutRvMovieComics.textViewMoreRvTopMovieComics;
-        textViewMoreRvNewOFilm = binding.layoutRvPopularMovie.textViewMoreRvNewOFilm;
+        linearLayoutNewFilm = binding.layoutNewFilm.linearLayoutNewFilm;
+        linearLayoutTopTvShow = binding.layoutRvTopTvShow.linearLayoutTopTvShow;
+        linearLayoutTopMovie = binding.layoutRvTopMovie.linearLayoutTopMovie;
+        linearLayoutTopMovieComics = binding.layoutRvMovieComics.linearLayoutTopMovieComics;
+        linearLayoutNewOFilm = binding.layoutRvPopularMovie.linearLayoutNewOFilm;
 
-        genre19 = binding.layoutRvCcategoryChips.genre19;
-        genre18 = binding.layoutRvCcategoryChips.genre18;
-        genre17 = binding.layoutRvCcategoryChips.genre17;
-        genre14 = binding.layoutRvCcategoryChips.genre14;
-        genre13 = binding.layoutRvCcategoryChips.genre13;
-        genre12 = binding.layoutRvCcategoryChips.genre12;
-        genre11 = binding.layoutRvCcategoryChips.genre11;
-        genre10 = binding.layoutRvCcategoryChips.genre10;
-        genre7 = binding.layoutRvCcategoryChips.genre7;
-        genre24 = binding.layoutRvCcategoryChips.genre24;
+        AsyncThreadBuilder a = new AsyncThreadBuilder() {
+            @Override
+            public Runnable start(Handler finishHandler) {
+                genre19 = binding.layoutRvCcategoryChips.genre19;
+                genre18 = binding.layoutRvCcategoryChips.genre18;
+                genre17 = binding.layoutRvCcategoryChips.genre17;
+                genre14 = binding.layoutRvCcategoryChips.genre14;
+                genre13 = binding.layoutRvCcategoryChips.genre13;
+                genre12 = binding.layoutRvCcategoryChips.genre12;
+                genre11 = binding.layoutRvCcategoryChips.genre11;
+                genre10 = binding.layoutRvCcategoryChips.genre10;
+                genre7 = binding.layoutRvCcategoryChips.genre7;
+                genre24 = binding.layoutRvCcategoryChips.genre24;
+                return null;
+            }
+
+            @Override
+            public void finishHandler(Bundle bundle) {
+
+            }
+        };
+        a.onStart();
+
 
         nstdScrollView = binding.nstdScrollView;
+
+        swipeRefreshLayout = binding.getRoot();
+
+
 
         onClickChipListener();
         onClickTextViewListenersMore();
 
-        swipeRefreshLayout = binding.getRoot();
         swipeRefreshLayout.setOnRefreshListener(this);
 
         rvPopularAll.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
@@ -187,11 +206,37 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
 
         nstdScrollView.setScrollY(positionNestedScrollView);
 
+
+        AsyncThreadBuilder threadBuilder;
         if (collections.isEmpty()) {
-            loadDataAndCreateAdapters();
+            threadBuilder = new AsyncThreadBuilder() {
+                @Override
+                public Runnable start(Handler finishHandler) {
+                    loadDataAndCreateAdapters();
+                    return null;
+                }
+
+                @Override
+                public void finishHandler(Bundle bundle) {
+
+                }
+            };
+
         } else {
-            setAdapters();
+            threadBuilder = new AsyncThreadBuilder() {
+                @Override
+                public Runnable start(Handler finishHandler) {
+                    setAdapters();
+                    return null;
+                }
+
+                @Override
+                public void finishHandler(Bundle bundle) {
+
+                }
+            };
         }
+        threadBuilder.onStart();
 
 
         createRecyclerTouchListeners();
@@ -199,22 +244,22 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
         return binding.getRoot();
     }
 
-    private void createRecyclerTouchListeners(){
+    private void createRecyclerTouchListeners() {
 
-        rvPopularAll.removeOnItemTouchListener(onItemClickListenerPopularAll);
+        /*rvPopularAll.removeOnItemTouchListener(onItemClickListenerPopularAll);
         rvPopularAll.addOnItemTouchListener(onItemClickListenerPopularAll = new MyRecyclerViewItemTouchListener(getContext(), rvPopularAll, new MyRecyclerViewItemTouchListener.OnItemClickListener() {
             @Override
             public void onItemClick(RecyclerView.ViewHolder holder, View view, int position) {
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("film", HomePageFragment.collections.get(Collection.TITLE_POPULAR_ALL).getItems().get(position));
-                Navigation.findNavController(view).navigate(R.id.filmFragment, bundle);
+                Navigation.findNavController(view).navigate(R.id.action_homePageFragment_to_filmFragment, bundle);
             }
 
             @Override
             public void onLongItemClick(RecyclerView.ViewHolder holder, View view, int position) {
                 showPopUpMenu(holder, view, position);
             }
-        }));
+        }));*/
 
         rvTopTvShow250.removeOnItemTouchListener(onItemClickListenerTvShow250);
         rvTopTvShow250.addOnItemTouchListener(onItemClickListenerTvShow250 = new MyRecyclerViewItemTouchListener(getContext(), rvTopTvShow250, new MyRecyclerViewItemTouchListener.OnItemClickListener() {
@@ -222,7 +267,7 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
             public void onItemClick(RecyclerView.ViewHolder holder, View view, int position) {
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("film", HomePageFragment.collections.get(Collection.TITLE_TOP_250_TV_SHOWS).getItems().get(position));
-                Navigation.findNavController(view).navigate(R.id.filmFragment, bundle);
+                Navigation.findNavController(view).navigate(R.id.action_homePageFragment_to_filmFragment, bundle);
             }
 
             @Override
@@ -231,7 +276,7 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
             }
         }));
 
-        rvTopMovie250.removeOnItemTouchListener(onItemClickListenerMovie250);
+        /*rvTopMovie250.removeOnItemTouchListener(onItemClickListenerMovie250);
         rvTopMovie250.addOnItemTouchListener(onItemClickListenerMovie250 = new MyRecyclerViewItemTouchListener(getContext(), rvTopMovie250, new MyRecyclerViewItemTouchListener.OnItemClickListener() {
             @Override
             public void onItemClick(RecyclerView.ViewHolder holder, View view, int position) {
@@ -244,7 +289,7 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
             public void onLongItemClick(RecyclerView.ViewHolder holder, View view, int position) {
                 showPopUpMenu(holder, view, position);
             }
-        }));
+        }));*/
 
         rvPopularOnlyMovie.removeOnItemTouchListener(onItemClickListenerPopularOnlyMovies);
         rvPopularOnlyMovie.addOnItemTouchListener(onItemClickListenerPopularOnlyMovies = new MyRecyclerViewItemTouchListener(getContext(), rvPopularOnlyMovie, new MyRecyclerViewItemTouchListener.OnItemClickListener() {
@@ -252,7 +297,7 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
             public void onItemClick(RecyclerView.ViewHolder holder, View view, int position) {
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("film", HomePageFragment.collections.get(Collection.TITLE_POPULAR_MOVIES).getItems().get(position));
-                Navigation.findNavController(view).navigate(R.id.filmFragment, bundle);
+                Navigation.findNavController(view).navigate(R.id.action_homePageFragment_to_filmFragment, bundle);
             }
 
             @Override
@@ -261,7 +306,7 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
             }
         }));
 
-        rvComics.removeOnItemTouchListener(onItemClickListenerComics);
+        /*rvComics.removeOnItemTouchListener(onItemClickListenerComics);
         rvComics.addOnItemTouchListener(onItemClickListenerComics = new MyRecyclerViewItemTouchListener(getContext(), rvComics, new MyRecyclerViewItemTouchListener.OnItemClickListener() {
             @Override
             public void onItemClick(RecyclerView.ViewHolder holder, View view, int position) {
@@ -274,41 +319,42 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
             public void onLongItemClick(RecyclerView.ViewHolder holder, View view, int position) {
                 showPopUpMenu(holder, view, position);
             }
-        }));
+        }));*/
+
     }
 
     private void setAdapters() {
 
-        rvPopularAll.setAdapter(adapterPopularAll);
-        rvPopularAll.addOnItemTouchListener(onItemClickListenerPopularAll);
+        /*rvPopularAll.setAdapter(adapterPopularAll);
+        rvPopularAll.addOnItemTouchListener(onItemClickListenerPopularAll);*/
 
 
         rvTopTvShow250.setAdapter(adapterTvShow250);
         rvTopTvShow250.addOnItemTouchListener(onItemClickListenerTvShow250);
 
 
-        rvTopMovie250.setAdapter(adapterMovie250);
-        rvTopMovie250.addOnItemTouchListener(onItemClickListenerMovie250);
+        /*rvTopMovie250.setAdapter(adapterMovie250);
+        rvTopMovie250.addOnItemTouchListener(onItemClickListenerMovie250);*/
 
 
         rvPopularOnlyMovie.setAdapter(adapterPopularOnlyMovies);
         rvPopularOnlyMovie.addOnItemTouchListener(onItemClickListenerPopularOnlyMovies);
 
 
-        rvComics.setAdapter(adapterComics);
-        rvComics.addOnItemTouchListener(onItemClickListenerComics);
+        /*rvComics.setAdapter(adapterComics);
+        rvComics.addOnItemTouchListener(onItemClickListenerComics);*/
 
 
     }
 
     private void loadDataAndCreateAdapters() {
 
-        if (!collections.containsKey(Collection.TITLE_POPULAR_ALL)) {
+        /*if (!collections.containsKey(Collection.TITLE_POPULAR_ALL)) {
             kinopoiskAPI.getListTopPopularAll(page, new KinopoiskAPI.RequestCallbackCollection() {
                 @Override
                 public void onSuccess(Collection collection) {
                     collections.put(collection.getTitleCollection(), collection);
-                    rvPopularAll.setAdapter(adapterPopularAll = new UniversalRecyclerAdapter(getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_HOLDER_SMALL_POSTER));
+                    rvPopularAll.setAdapter(adapterPopularAll = new UniversalRecyclerAdapter(getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_HOLDER_BIG_POSTER));
                 }
 
                 @Override
@@ -324,10 +370,13 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
         } else {
             rvPopularAll.setAdapter(adapterPopularAll);
             rvPopularAll.addOnItemTouchListener(onItemClickListenerPopularAll);
-        }
+        }*/
 
-        if (!collections.containsKey(Collection.TITLE_NEWS_MEDIA)) {
-            kinopoiskAPI.getListNewsMedia(page, this);
+        if (settingsApp.getParam(SettingsApp.SettingsKeys.BLOCK_NEWS_MEDIA, SettingsApp.SettingsDefsVal.VISIBLE_BLOCK_NEWS_MEDIA)) {
+            binding.layoutVpNewsMedia.getRoot().setVisibility(View.VISIBLE);
+            if (!collections.containsKey(Collection.TITLE_NEWS_MEDIA)) {
+                kinopoiskAPI.getListNewsMedia(page, this);
+            }
         }
 
         if (!collections.containsKey(Collection.TITLE_TOP_250_TV_SHOWS)) {
@@ -335,7 +384,7 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
                 @Override
                 public void onSuccess(Collection collection) {
                     collections.put(collection.getTitleCollection(), collection);
-                    rvTopTvShow250.setAdapter(adapterTvShow250 = new UniversalRecyclerAdapter(getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_HOLDER_BIG_POSTER));
+                    rvTopTvShow250.setAdapter(adapterTvShow250 = new UniversalRecyclerAdapter(getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_HOLDER_SMALL_POSTER));
                 }
 
                 @Override
@@ -354,7 +403,7 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
 
         }
 
-        if (!collections.containsKey(Collection.TITLE_TOP_250_MOVIES)) {
+        /*if (!collections.containsKey(Collection.TITLE_TOP_250_MOVIES)) {
             kinopoiskAPI.getListTop250Movies(page, new KinopoiskAPI.RequestCallbackCollection() {
                 @Override
                 public void onSuccess(Collection collection) {
@@ -376,34 +425,9 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
             rvTopMovie250.setAdapter(adapterMovie250);
             rvTopMovie250.addOnItemTouchListener(onItemClickListenerMovie250);
 
-        }
+        }*/
 
-
-        if (!collections.containsKey(Collection.TITLE_POPULAR_MOVIES)) {
-            kinopoiskAPI.getListTopPopularMovies(page, new KinopoiskAPI.RequestCallbackCollection() {
-                @Override
-                public void onSuccess(Collection collection) {
-                    collections.put(collection.getTitleCollection(), collection);
-                    rvPopularOnlyMovie.setAdapter(adapterPopularOnlyMovies = new UniversalRecyclerAdapter(getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_FULL_WIDTH));
-                }
-
-                @Override
-                public void onFailure(IOException e) {
-
-                }
-
-                @Override
-                public void finish() {
-
-                }
-            });
-        } else {
-            rvPopularOnlyMovie.setAdapter(adapterPopularOnlyMovies);
-            rvPopularOnlyMovie.addOnItemTouchListener(onItemClickListenerPopularOnlyMovies);
-
-        }
-
-        if (!collections.containsKey(Collection.TITLE_COMICS_THEME)) {
+        /*if (!collections.containsKey(Collection.TITLE_COMICS_THEME)) {
             kinopoiskAPI.getListComicsTheme(page, new KinopoiskAPI.RequestCallbackCollection() {
                 @Override
                 public void onSuccess(Collection collection) {
@@ -424,8 +448,33 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
         } else {
             rvComics.setAdapter(adapterComics);
             rvComics.addOnItemTouchListener(onItemClickListenerComics);
+        }*/
+
+        if (!collections.containsKey(Collection.TITLE_POPULAR_MOVIES)) {
+            kinopoiskAPI.getListTopPopularMovies(page, new KinopoiskAPI.RequestCallbackCollection() {
+                @Override
+                public void onSuccess(Collection collection) {
+                    collections.put(collection.getTitleCollection(), collection);
+                    rvPopularOnlyMovie.setAdapter(adapterPopularOnlyMovies = new UniversalRecyclerAdapter(getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_FULL_WIDTH));
+                }
+
+                @Override
+                public void onFailure(IOException e) {
+
+                }
+
+                @Override
+                public void finish() {
+
+                }
+            });
+
+        } else {
+            rvPopularOnlyMovie.setAdapter(adapterPopularOnlyMovies);
+            rvPopularOnlyMovie.addOnItemTouchListener(onItemClickListenerPopularOnlyMovies);
 
         }
+
 
     }
 
@@ -523,7 +572,7 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
 
     private void onClickTextViewListenersMore() {
         // Новинки Фильмы и сериалы
-        textViewMoreRvNewFilm.setOnClickListener(new View.OnClickListener() {
+        linearLayoutNewFilm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Bundle bundle = new Bundle();
@@ -533,7 +582,7 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
         });
 
         // Топ 250 сериалов
-        textViewMoreRvTopTvShow.setOnClickListener(new View.OnClickListener() {
+        linearLayoutTopTvShow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Bundle bundle = new Bundle();
@@ -543,7 +592,7 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
         });
 
         // Топ 250 фильмов
-        textViewMoreRvTopMovie.setOnClickListener(new View.OnClickListener() {
+        linearLayoutTopMovie.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Bundle bundle = new Bundle();
@@ -553,7 +602,7 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
         });
 
         // По комиксам
-        textViewMoreRvTopMovieComics.setOnClickListener(new View.OnClickListener() {
+        linearLayoutTopMovieComics.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Bundle bundle = new Bundle();
@@ -563,7 +612,7 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
         });
 
         // Популярные фильмы
-        textViewMoreRvNewOFilm.setOnClickListener(new View.OnClickListener() {
+        linearLayoutNewOFilm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Bundle bundle = new Bundle();
@@ -587,7 +636,7 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
             /*AdapterNewsMediaViewPager2.ZoomOutPageTransformer zoom = new AdapterNewsMediaViewPager2.ZoomOutPageTransformer();
             viewPager2.setPageTransformer(zoom);*/
 
-            AdapterNewsMediaViewPager2.DepthPageTransformer customPageTransformer = new AdapterNewsMediaViewPager2.DepthPageTransformer();
+            AdapterNewsMediaViewPager2.ZoomOutPageTransformer customPageTransformer = new AdapterNewsMediaViewPager2.ZoomOutPageTransformer();
             viewPager2.setPageTransformer(customPageTransformer);
 
         }
@@ -636,7 +685,6 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
         }*/
     }
 
-
     private void showPopUpMenu(RecyclerView.ViewHolder holder, View view, int position) {
         boolean isFavorite = utils.isFilmInFavorite(String.valueOf(view.getId()));
         boolean isViewed = utils.isFilmInViewed(String.valueOf(view.getId()));
@@ -682,8 +730,6 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
                         ((UniversalRecyclerAdapter.ViewHolderBigPoster) holder).getImageViewIsViewedBig().setVisibility(View.GONE);
                         return true;
                     } else if (item.getItemId() == R.id.search_similar) {
-
-
                         Bundle bundle = new Bundle();
                         bundle.putInt("kinopoiskId", collections.get(view.getContentDescription().toString()).getItems().get(position).getKinopoiskId());
                         bundle.putString("category", Collection.TITLE_SIMILAR);
@@ -693,6 +739,10 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
                         builder.setPopUpTo(R.id.homePageFragment, false);
                         Navigation.findNavController(view).navigate(R.id.categoryListFilmFragment, bundle, builder.build());
                         return true;
+                    } else if (item.getItemId() == R.id.open_film) {
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("film", collections.get(view.getContentDescription().toString()).getItems().get(position));
+                        Navigation.findNavController(view).navigate(R.id.action_homePageFragment_to_filmFragment, bundle);
                     }
                     return false;
                 }
@@ -732,6 +782,10 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
                         builder.setPopUpTo(R.id.homePageFragment, false);
                         Navigation.findNavController(view).navigate(R.id.categoryListFilmFragment, bundle, builder.build());
                         return true;
+                    } else if (item.getItemId() == R.id.open_film) {
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("film", collections.get(view.getContentDescription().toString()).getItems().get(position));
+                        Navigation.findNavController(view).navigate(R.id.action_homePageFragment_to_filmFragment, bundle);
                     }
                     return false;
                 }
@@ -771,6 +825,10 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
                         builder.setPopUpTo(R.id.homePageFragment, false);
                         Navigation.findNavController(view).navigate(R.id.categoryListFilmFragment, bundle, builder.build());
                         return true;
+                    } else if (item.getItemId() == R.id.open_film) {
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable("film", collections.get(view.getContentDescription().toString()).getItems().get(position));
+                        Navigation.findNavController(view).navigate(R.id.action_homePageFragment_to_filmFragment, bundle);
                     }
                     return false;
                 }
@@ -779,7 +837,6 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
 
         popupMenu.show();
     }
-
 
     @Override
     public void onPause() {
@@ -790,11 +847,7 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
         bundleSaveState.putInt("posViewPager", viewPager2.getCurrentItem());
         bundleSaveState.putLong("lastRefresTs", lastRefresTs);
         onSaveInstanceState(bundleSaveState);
+
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        binding = null;
-    }
 }

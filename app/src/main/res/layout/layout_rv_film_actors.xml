@@ -38,7 +38,7 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:layout_weight="1"
-                android:rotation="90"
+                android:rotation="0"
                 android:tint="?attr/IconTintColorDayNightTheme"
                 app:srcCompat="@drawable/rounded_arrow_right_24" />
         </LinearLayout>
@@ -48,7 +48,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp">
+            android:layout_marginBottom="16dp"
+            android:visibility="gone">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvActors"

@@ -21,8 +21,13 @@
 
     <attr name="IconColorBaseDarkWhite" format="color"/>
 
+    <!--ХЗ ГДЕ ИСПОЛЬЗУЕТСЯ !-->
     <attr name="HintDayNightTheme" format="color"/>
 
+    <!--НЕ ИСПОЛЬЗУЕТСЯ !-->
     <attr name="FloatingActionButtonTheme" format="color"/>
+
+    <attr name="RippleColorTheme" format="color"/>
+
 
 </resources>

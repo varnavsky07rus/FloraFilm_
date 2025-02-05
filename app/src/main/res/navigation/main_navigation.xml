@@ -9,7 +9,15 @@
         android:id="@+id/homePageFragment"
         android:name="com.alaka_ala.florafilm.ui.home.HomePageFragment"
         android:label="Главная"
-        tools:layout="@layout/fragment_home_page" />
+        tools:layout="@layout/fragment_home_page" >
+        <action
+            android:id="@+id/action_homePageFragment_to_filmFragment"
+            app:destination="@id/filmFragment"
+            app:enterAnim="@anim/enter_anim_my"
+            app:exitAnim="@anim/exit_anim_my"
+            app:popEnterAnim="@anim/enter_anim_my"
+            app:popExitAnim="@anim/exit_anim_my" />
+    </fragment>
     <fragment
         android:id="@+id/searchFragment"
         android:name="com.alaka_ala.florafilm.ui.search.SearchFragment"
@@ -53,5 +61,16 @@
         android:id="@+id/VKGroupsFragment"
         android:name="com.alaka_ala.florafilm.ui.vk.ui.groups.VKGroupsFragment"
         android:label="VK Группы"
-        tools:layout="@layout/fragment_v_k_groups" />
+        tools:layout="@layout/fragment_v_k_groups" >
+        <action
+            android:id="@+id/action_VKGroupsFragment_to_playlistGroupFragment"
+            app:destination="@id/playlistGroupFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
+    </fragment>
+    <fragment
+        android:id="@+id/playlistGroupFragment"
+        android:name="com.alaka_ala.florafilm.ui.vk.ui.groups.playlist.PlaylistGroupFragment"
+        android:label="Плейлист"
+        tools:layout="@layout/fragment_playlist_group" />
 </navigation>

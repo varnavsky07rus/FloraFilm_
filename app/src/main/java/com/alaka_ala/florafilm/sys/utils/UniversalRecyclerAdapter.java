@@ -1,6 +1,10 @@
 package com.alaka_ala.florafilm.sys.utils;
 
 import android.annotation.SuppressLint;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.alaka_ala.florafilm.R;
 import com.alaka_ala.florafilm.sys.kp_api.Collection;
+import com.alaka_ala.florafilm.sys.kp_api.ListFilmItem;
 import com.squareup.picasso.Picasso;
 
 public class UniversalRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -72,6 +77,111 @@ public class UniversalRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.
     @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+
+        Handler handlerUniversalAdapter = new Handler( new Handler.Callback() {
+            @Override
+            public boolean handleMessage(@NonNull Message msg) {
+                int position = msg.getData().getInt("position");
+                boolean isFavorite = msg.getData().getBoolean("favorite");
+                boolean isViewed = msg.getData().getBoolean("viewed");
+
+                ListFilmItem item = collection.getItems().get(position);
+                holder.itemView.setId(item.getKinopoiskId());
+                holder.itemView.setContentDescription(collection.getTitleCollection());
+
+                // Большой постер
+                if (holder instanceof ViewHolderBigPoster) {
+                    ViewHolderBigPoster holderBigPoster = (ViewHolderBigPoster) holder;
+
+                    if (isFavorite) {
+                        holderBigPoster.imageViewSaveToFavoriteBig.setVisibility(View.VISIBLE);
+                        holderBigPoster.imageViewSaveToFavoriteBig.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                utilsFavoriteAndViewFilm.removeFromFavorite(String.valueOf(collection.getItems().get(holder.getPosition()).getKinopoiskId()), holder.getPosition());
+                                holderBigPoster.imageViewSaveToFavoriteBig.setVisibility(View.GONE);
+                            }
+                        });
+                    }
+
+                    if (isViewed) {
+                        holderBigPoster.imageViewIsViewedBig.setVisibility(View.VISIBLE);
+                        holderBigPoster.imageViewIsViewedBig.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                utilsFavoriteAndViewFilm.removeFromViewed(String.valueOf(collection.getItems().get(holder.getPosition()).getKinopoiskId()), holder.getPosition());
+                                holderBigPoster.imageViewIsViewedBig.setVisibility(View.GONE);
+                            }
+                        });
+                    }
+
+                    Picasso.get().load(collection.getItems().get(position).getPosterUrlPreview()).placeholder(R.drawable.sad_rounded_square_emoticon).into(holderBigPoster.imageViewPosterBig);
+                }
+
+                // Маленький постер
+                else if (holder instanceof ViewHolderSmallPoster) {
+                    ViewHolderSmallPoster holderSmallPoster = (ViewHolderSmallPoster) holder;
+
+                    if (isFavorite) {
+                        holderSmallPoster.imageViewSaveToFavoriteSmall.setVisibility(View.VISIBLE);
+                        holderSmallPoster.imageViewSaveToFavoriteSmall.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                utilsFavoriteAndViewFilm.removeFromFavorite(String.valueOf(collection.getItems().get(holder.getPosition()).getKinopoiskId()), holder.getPosition());
+                                holderSmallPoster.imageViewSaveToFavoriteSmall.setVisibility(View.GONE);
+                            }
+                        });
+                    }
+
+                    if (isViewed) {
+                        holderSmallPoster.imageViewIsViewedSmall.setVisibility(View.VISIBLE);
+                        holderSmallPoster.imageViewIsViewedSmall.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                utilsFavoriteAndViewFilm.removeFromViewed(String.valueOf(collection.getItems().get(holder.getPosition()).getKinopoiskId()), holder.getPosition());
+                                holderSmallPoster.imageViewIsViewedSmall.setVisibility(View.GONE);
+                            }
+                        });
+                    }
+
+                    Picasso.get().load(collection.getItems().get(position).getPosterUrlPreview()).placeholder(R.drawable.sad_rounded_square_emoticon).into(holderSmallPoster.imageViewPosterSmall);
+                }
+
+                // Полный размер
+                else if (holder instanceof ViewHolderFullWidth) {
+                    ViewHolderFullWidth holderFullWidth = (ViewHolderFullWidth) holder;
+
+                    if (isFavorite) {
+                        holderFullWidth.imageViewisForeverItem3.setVisibility(View.VISIBLE);
+                        holderFullWidth.imageViewisForeverItem3.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                utilsFavoriteAndViewFilm.removeFromFavorite(String.valueOf(collection.getItems().get(holder.getPosition()).getKinopoiskId()), holder.getPosition());
+                                holderFullWidth.imageViewisForeverItem3.setVisibility(View.GONE);
+                            }
+                        });
+                    }
+
+                    if (isViewed) {
+                        holderFullWidth.imageViewIsViewedItem3.setVisibility(View.VISIBLE);
+                        holderFullWidth.imageViewIsViewedItem3.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                utilsFavoriteAndViewFilm.removeFromViewed(String.valueOf(collection.getItems().get(holder.getPosition()).getKinopoiskId()), holder.getPosition());
+                                holderFullWidth.imageViewIsViewedItem3.setVisibility(View.GONE);
+                            }
+                        });
+                    }
+
+                    Picasso.get().load(collection.getItems().get(position).getPosterUrlPreview()).placeholder(R.drawable.sad_rounded_square_emoticon).into(holderFullWidth.imageViewPosterFilmItem3);
+                    holderFullWidth.textViewTitleFilmItem3.setText(collection.getItems().get(position).getNameRu());
+
+                }
+
+                return false;
+            }
+        });
+
         // Пустые данные
         if (holder instanceof ViewHolderNullData) {
             ViewHolderNullData holderNullData = (ViewHolderNullData) holder;
@@ -81,109 +191,26 @@ public class UniversalRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.
             return;
         }
 
-        holder.itemView.setId(collection.getItems().get(position).getKinopoiskId());
-        holder.itemView.setContentDescription(collection.getTitleCollection());
+        Thread threadAsyncCreateHolder = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                boolean isFavorite = utilsFavoriteAndViewFilm.isFilmInFavorite(String.valueOf(collection.getItems().get(holder.getPosition()).getKinopoiskId()));
+                boolean isViewed = utilsFavoriteAndViewFilm.isFilmInViewed(String.valueOf(collection.getItems().get(holder.getPosition()).getKinopoiskId()));
+                ListFilmItem item = collection.getItems().get(holder.getPosition());
+                Bundle bundle = new Bundle();
+                bundle.putInt("position", holder.getPosition());
+                bundle.putBoolean("favorite", isFavorite);
+                bundle.putBoolean("viewed", isViewed);
+                bundle.putSerializable("item", item);
 
-        boolean isFavorite = utilsFavoriteAndViewFilm.isFilmInFavorite(String.valueOf(collection.getItems().get(position).getKinopoiskId()));
-        boolean isViewed = utilsFavoriteAndViewFilm.isFilmInViewed(String.valueOf(collection.getItems().get(position).getKinopoiskId()));
-
-        // Большой постер
-        if (holder instanceof ViewHolderBigPoster) {
-            ViewHolderBigPoster holderBigPoster = (ViewHolderBigPoster) holder;
-            Picasso.get().load(collection.getItems().get(position).getPosterUrlPreview()).into(holderBigPoster.imageViewPosterBig);
-            if (isFavorite) {
-                holderBigPoster.imageViewSaveToFavoriteBig.setVisibility(View.VISIBLE);
-            } else {
-                holderBigPoster.imageViewSaveToFavoriteBig.setVisibility(View.GONE);
+                Message message = new Message();
+                message.setData(bundle);
+                handlerUniversalAdapter.sendMessage(message);
             }
-            if (isViewed) {
-                holderBigPoster.imageViewIsViewedBig.setVisibility(View.VISIBLE);
+        });
+        threadAsyncCreateHolder.start();
 
-            } else {
-                holderBigPoster.imageViewIsViewedBig.setVisibility(View.GONE);
-            }
 
-            holderBigPoster.imageViewSaveToFavoriteBig.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    utilsFavoriteAndViewFilm.removeFromFavorite(String.valueOf(collection.getItems().get(holder.getPosition()).getKinopoiskId()), holder.getPosition());
-                    holderBigPoster.imageViewSaveToFavoriteBig.setVisibility(View.GONE);
-                }
-            });
-
-            holderBigPoster.imageViewIsViewedBig.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    utilsFavoriteAndViewFilm.removeFromViewed(String.valueOf(collection.getItems().get(holder.getPosition()).getKinopoiskId()), holder.getPosition());
-                    holderBigPoster.imageViewIsViewedBig.setVisibility(View.GONE);
-                }
-            });
-        }
-
-        // Маленький постер
-        else if (holder instanceof ViewHolderSmallPoster) {
-            ViewHolderSmallPoster holderSmallPoster = (ViewHolderSmallPoster) holder;
-            Picasso.get().load(collection.getItems().get(position).getPosterUrlPreview()).into(holderSmallPoster.imageViewPosterSmall);
-            if (isFavorite) {
-                holderSmallPoster.imageViewSaveToFavoriteSmall.setVisibility(View.VISIBLE);
-            } else {
-                holderSmallPoster.imageViewSaveToFavoriteSmall.setVisibility(View.GONE);
-            }
-            if (isViewed) {
-                holderSmallPoster.imageViewIsViewedSmall.setVisibility(View.VISIBLE);
-            } else {
-                holderSmallPoster.imageViewIsViewedSmall.setVisibility(View.GONE);
-
-            }
-
-            holderSmallPoster.imageViewSaveToFavoriteSmall.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    utilsFavoriteAndViewFilm.removeFromFavorite(String.valueOf(collection.getItems().get(holder.getPosition()).getKinopoiskId()), holder.getPosition());
-                    holderSmallPoster.imageViewSaveToFavoriteSmall.setVisibility(View.GONE);
-                }
-            });
-
-            holderSmallPoster.imageViewIsViewedSmall.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    utilsFavoriteAndViewFilm.removeFromViewed(String.valueOf(collection.getItems().get(holder.getPosition()).getKinopoiskId()), holder.getPosition());
-                    holderSmallPoster.imageViewIsViewedSmall.setVisibility(View.GONE);
-                }
-            });
-        }
-
-        // Полный размер
-        else if (holder instanceof ViewHolderFullWidth) {
-            ViewHolderFullWidth holderFullWidth = (ViewHolderFullWidth) holder;
-            if (isFavorite) {
-                holderFullWidth.imageViewisForeverItem3.setVisibility(View.VISIBLE);
-            } else {
-                holderFullWidth.imageViewisForeverItem3.setVisibility(View.GONE);
-            }
-            if (isViewed) {
-                holderFullWidth.imageViewIsViewedItem3.setVisibility(View.VISIBLE);
-            } else {
-                holderFullWidth.imageViewIsViewedItem3.setVisibility(View.GONE);
-            }
-            holderFullWidth.imageViewisForeverItem3.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    utilsFavoriteAndViewFilm.removeFromFavorite(String.valueOf(collection.getItems().get(holder.getPosition()).getKinopoiskId()), holder.getPosition());
-                    holderFullWidth.imageViewisForeverItem3.setVisibility(View.GONE);
-                }
-            });
-            holderFullWidth.imageViewIsViewedItem3.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    utilsFavoriteAndViewFilm.removeFromViewed(String.valueOf(collection.getItems().get(holder.getPosition()).getKinopoiskId()), holder.getPosition());
-                    holderFullWidth.imageViewIsViewedItem3.setVisibility(View.GONE);
-                }
-            });
-            Picasso.get().load(collection.getItems().get(position).getPosterUrlPreview()).into(holderFullWidth.imageViewPosterFilmItem3);
-            holderFullWidth.textViewTitleFilmItem3.setText(collection.getItems().get(position).getNameRu());
-
-        }
     }
 
     @Override
@@ -286,5 +313,9 @@ public class UniversalRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.
             textViewResultText = itemView.findViewById(R.id.textViewResultText);
         }
     }
+
+
+
+
 
 }

@@ -56,13 +56,14 @@ public class AdapterPlaylistsGroup extends RecyclerView.Adapter<AdapterPlaylists
             String urlPlaylistImg = "";
             for (VKVideo.VideoItem.Image image : groupItem.getPlayLists().get(position).getImages()) {
                 urlPlaylistImg = image.getUrl();
-                if (image.getHeight() == 1280) {
+                if (image.getHeight() == 450) {
                     urlPlaylistImg = image.getUrl();
                     break;
                 }
             }
             if (!urlPlaylistImg.isEmpty()) {
-                Picasso.get().load(groupItem.getPlayLists().get(position).getImages().get(4).getUrl()).into(holder.imageViewPosterVkPlaylist);
+                //String urlImg = groupItem.getPlayLists().get(position).getImages().get(!groupItem.getPlayLists().get(position).getImages().isEmpty() ? groupItem.getPlayLists().get(position).getImages().size() - 1 : 0).getUrl();
+                Picasso.get().load(urlPlaylistImg).into(holder.imageViewPosterVkPlaylist);
             }
             holder.textViewTitlePlaylist.setText(groupItem.getPlayLists().get(position).getTitle());
         }

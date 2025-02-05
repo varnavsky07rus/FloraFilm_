@@ -18,14 +18,6 @@
             android:layout_height="1dp"
             android:background="?android:attr/listDivider" />
 
-        <androidx.appcompat.widget.SearchView
-            android:id="@+id/serchView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:overScrollMode="ifContentScrolls"
-            android:queryHint="Во все тяжкие, Назад в Будущее, Один дома"
-            app:defaultQueryHint="Во все тяжкие, Назад в Будущее..." />
-
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabs"
             style="@null"

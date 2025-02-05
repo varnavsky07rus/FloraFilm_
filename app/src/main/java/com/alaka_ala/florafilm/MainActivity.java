@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -17,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -65,13 +67,11 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     private NavController navController;
     private SettingsApp settingsApp;
-    private FloatingActionButton floatingActionButtonMenu;
     private static CallbackVisibilityFloatActionButtonMenu callbackVisibilityFloatActionButtonMenu;
     private static CallbackFullscreenAppMode callbackFullscreenAppMode;
     private AppBarConfiguration appBarConfiguration;
     private CoordinatorLayout coordinatorLayout;
     private AppBarLayout appBarLayout;
-    private TextClock textClock;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -89,27 +89,34 @@ public class MainActivity extends AppCompatActivity {
                 // Включает аппаратное ускорение
                 WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED, WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
         );
+
+
+
+
+
+
+
         settingsApp = new SettingsApp(this);
         nav_view = binding.navView;
         toolbar = binding.toolbar;
         drawerLayout = binding.drawerLayout;
         coordinatorLayout = binding.coordinatorLayout;
         appBarLayout = binding.appBarLayout;
-        textClock = binding.textClock;
 
 
         if (settingsApp.getParam(SettingsApp.SettingsKeys.HIDE_APP_BAR_LAYOUT, SettingsApp.SettingsDefsVal.HIDE_APP_BAR_LAYOUT)) {
             appBarLayout.setVisibility(View.GONE);
-            textClock.setVisibility(View.GONE);
         }
 
+        // Делаем статус-бар прозрачным
+        // getWindow().setStatusBarColor(Color.TRANSPARENT);
 
         setSupportActionBar(toolbar);
 
         navController = Navigation.findNavController(MainActivity.this, R.id.nav_host_fragment_activity_main);
         NavigationUI.setupWithNavController(nav_view, navController);
         AppBarConfiguration.Builder builder = new AppBarConfiguration.Builder(navController.getGraph());
-
+        builder.setDrawerLayout(drawerLayout);
         appBarConfiguration = builder.build();
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
@@ -118,7 +125,6 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        floatingActionButtonMenu = binding.floatingActionButtonMenu;
 
         // Обработчик и натройка на полноэкранный режим
         fullscreenAppMode(settingsApp.getParam(SettingsApp.SettingsKeys.FULL_SCREEN_APP_MODE, SettingsApp.SettingsDefsVal.FULL_SCREEN_APP_MODE), false);
@@ -131,7 +137,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onHideAppBars(boolean hide) {
                 appBarLayout.setVisibility(hide ? View.GONE : View.VISIBLE);
-                textClock.setVisibility(hide ? View.GONE : View.VISIBLE);
                 Snackbar.make(binding.getRoot(), "Перезагрузить приложение сейчас?", Snackbar.LENGTH_SHORT).setAction("Да", new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -140,15 +145,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }).show();
 
-            }
-        });
-
-        // Обработчик и настройка на Visibility FloatActionButtonMenu (показ/скрытие кнопки)
-        floatActionButtonMenu();
-        setCallbackVisibilityFloatActionButtonMenu(new CallbackVisibilityFloatActionButtonMenu() {
-            @Override
-            public void onVisibilityFloatActionButtonMenu(boolean visibility) {
-                floatingActionButtonMenu.setVisibility(visibility ? View.VISIBLE : View.GONE);
             }
         });
 
@@ -177,14 +173,10 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
-                if (startFabPosition == 0) {
-                    startFabPosition = floatingActionButtonMenu.getX();
-                }
 
 
-                float fabShift = floatingActionButtonMenu.getWidth() * slideOffset;
-                coordinatorLayout.setX(fabShift * 2f);
-                floatingActionButtonMenu.setX(startFabPosition + fabShift * 2f);
+                float fabShift = drawerView.getWidth() * slideOffset;
+                coordinatorLayout.setX(fabShift);
             }
 
             @Override
@@ -195,7 +187,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDrawerClosed(@NonNull View drawerView) {
                 isOpened = false;
-                floatingActionButtonMenu.setX(startFabPosition); // Возвращаем кнопку на место}
             }
 
             @Override
@@ -263,66 +254,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    private void floatActionButtonMenu() {
-        if (settingsApp.getParam(SettingsApp.SettingsKeys.FLOAT_ACTION_BUTTON_MENU, SettingsApp.SettingsDefsVal.VISIBLE_FLOAT_ACTION_BUTTON_MENU)) {
-            floatingActionButtonMenu.setVisibility(View.VISIBLE);
-        } else {
-            floatingActionButtonMenu.setVisibility(View.GONE);
-        }
-        floatingActionButtonMenu.setOnTouchListener(new ViewClickable(this) {
-            @Override
-            public void onTouchClick(View view, MotionEvent e) {
-                drawerLayout.open();
-            }
-
-            @Override
-            public void onTouchLongClick(View view, MotionEvent e) {
-                PopupMenu popupMenu = new PopupMenu(MainActivity.this, floatingActionButtonMenu, GravityCompat.START);
-                popupMenu.getMenuInflater().inflate(R.menu.navigation_app, popupMenu.getMenu());
-                Menu menu = popupMenu.getMenu();
-                popupMenu.setForceShowIcon(true);
-                menu.add("Скрыть кнопку").setIcon(R.drawable.rounded_hide_source_24);
-                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        if (item.getTitle() == null) return false;
-                        switch (item.getTitle().toString()) {
-                            case "Скрыть кнопку":
-                                floatingActionButtonMenu.setVisibility(View.GONE);
-                                settingsApp.saveParam(SettingsApp.SettingsKeys.FLOAT_ACTION_BUTTON_MENU, false);
-                                return true;
-                            case "Настройки":
-                                navController.navigate(R.id.settingsAppFragment);
-                                return true;
-                            case "Главная":
-                                navController.navigate(R.id.homePageFragment);
-                                return true;
-                            case "Поиск":
-                                navController.navigate(R.id.searchFragment);
-                                return true;
-                            case "Избранное":
-                                navController.navigate(R.id.favoriteFragment);
-                                return true;
-                            case "Просмотренные":
-                                navController.navigate(R.id.viewedFragment);
-                                return true;
-
-                        }
-                        return false;
-                    }
-                });
-                popupMenu.show();
-            }
-
-            @Override
-            public void onDoubleClick(View view, MotionEvent e) {
-                Toast.makeText(MainActivity.this, "Двойной клик", Toast.LENGTH_SHORT).show();
-            }
-
-
-        });
-    }
 
     @Override
     public boolean onSupportNavigateUp() {
@@ -346,13 +277,6 @@ public class MainActivity extends AppCompatActivity {
         return super.onKeyDown(keyCode, event);
     }
 
-    public static void setVisibilityFloatActionButtonMenu(boolean visibility) {
-        callbackVisibilityFloatActionButtonMenu.onVisibilityFloatActionButtonMenu(visibility);
-    }
-
-    public void setCallbackVisibilityFloatActionButtonMenu(CallbackVisibilityFloatActionButtonMenu cb) {
-        this.callbackVisibilityFloatActionButtonMenu = cb;
-    }
 
     private interface CallbackVisibilityFloatActionButtonMenu {
         void onVisibilityFloatActionButtonMenu(boolean visibility);

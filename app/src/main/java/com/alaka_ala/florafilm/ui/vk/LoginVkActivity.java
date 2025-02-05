@@ -41,7 +41,7 @@ import okhttp3.Response;
 public class LoginVkActivity extends AppCompatActivity {
     private ActivityLoginVkBinding binding;
     private WebView webViewLoginVk;
-    private static final String CLIENT_ID = "6287487"; //  6287487 (VK.COM)   | 6121396 (VK ADMIN)  | KATE (2685278)
+    private static final String CLIENT_ID = "6463690"; //  6287487 (VK.COM)   | 6121396 (VK ADMIN)  | KATE (2685278) | 6463690 (Маруся)
     private static final String SCOPE = "video,audio,offline"; //   // 1073737727 - Полный доступ
     private static String baseURl;
     public static final String USER_AGENT = "VKAndroidApp/5.52-4543 (Android 5.1.1; SDK 22; x86_64; unknown Android SDK built for x86_64; en; 320x240)";
@@ -67,7 +67,7 @@ public class LoginVkActivity extends AppCompatActivity {
         webViewLoginVk.getSettings().setJavaScriptCanOpenWindowsAutomatically(false);
         Map<String, String> headers = new HashMap<>();
         headers.put("User-Agent", USER_AGENT);
-        baseURl = "https://oauth.vk.com/authorize?&redirect_uri=" + REDIRECT_URI + "&client_id=" + CLIENT_ID + "&scope=" + SCOPE + "&response_type=token&v=5.95&revoke=1&display=page";
+        baseURl = "https://oauth.vk.com/authorize?&redirect_uri=" + REDIRECT_URI + "&client_id=" + CLIENT_ID + "&scope=" + SCOPE + "&response_type=token&v=5.199&revoke=1&display=android";
 
         webViewLoginVk.setWebViewClient(new WebViewClient() {
             @Override
@@ -112,8 +112,11 @@ public class LoginVkActivity extends AppCompatActivity {
             String acceessToken = authorize_uri.getQueryParameter("access_token");
             String userId = authorize_uri.getQueryParameter("user_id");
             String expiresIn = authorize_uri.getQueryParameter("expires_in");
-
-            getProfileInfo(acceessToken, expiresIn, new CallbackGetProfileInfo() {
+            if (expiresIn == null || expiresIn.isEmpty()) {
+                int tsExpiresToken = (int) Math.abs(System.currentTimeMillis() / 1000 + 3600);
+                expiresIn = "" + tsExpiresToken; // 1 Час действителен токен
+            }
+            getProfileInfo(acceessToken, Integer.parseInt(expiresIn), new CallbackGetProfileInfo() {
                 @Override
                 public void onSuccess(Account account) {
                     AccountManager.saveAccount(LoginVkActivity.this, account);
@@ -132,7 +135,7 @@ public class LoginVkActivity extends AppCompatActivity {
 
     }
 
-    private void getProfileInfo(String acceessToken, String expiresIn, CallbackGetProfileInfo callback) {
+    private void getProfileInfo(String acceessToken, int expiresIn, CallbackGetProfileInfo callback) {
         String baseUrl = "https://api.vk.com/method/account.getProfileInfo?v=5.131&access_token=" + acceessToken;
         Handler handler = new Handler(new Handler.Callback() {
             @Override
@@ -154,12 +157,13 @@ public class LoginVkActivity extends AppCompatActivity {
                             builder.setStatus(response.getString("status"));
                             builder.setPhoto200(response.getString("photo_200"));
                             builder.setBdate(response.getString("bdate"));
-                            builder.setIsVerified(response.getBoolean("is_verified"));
+
+                            builder.setIsVerified(response.has("is_verified") && response.getBoolean("is_verified"));
                             builder.setFirstName(response.getString("first_name"));
                             builder.setLastName(response.getString("last_name"));
                             builder.setPhone(response.getString("phone"));
                             builder.setScreenName(response.getString("screen_name"));
-                            builder.setExpire_in(expiresIn);
+                            builder.setExpireIn(expiresIn);
                             builder.setAccessToken(acceessToken);
                             callback.onSuccess(builder.build());
                         } catch (JSONException e) {
@@ -206,8 +210,8 @@ public class LoginVkActivity extends AppCompatActivity {
     }
 
     public static class Account implements Serializable {
-        public static int DEF_EXPIRES_TOKEN_SEC = 86400; // 24 часа
-        public static int DEF_EXPIRES_TOKEN_MS = 86400000; // 24 часа в мс
+        public static int DEF_EXPIRES_TOKEN_SEC = 3600; // 1 часа в сек
+        public static int DEF_EXPIRES_TOKEN_MS = 3600000; // 1 час в мс
 
         public Account(Builder builder) {
             this.tokenReplacementTimeStamp = builder.tokenReplacementTimeStamp;
@@ -269,7 +273,7 @@ public class LoginVkActivity extends AppCompatActivity {
             return access_token;
         }
 
-        public String getExpire_in() {
+        public int getExpireIn() {
             return expire_in;
         }
 
@@ -289,7 +293,7 @@ public class LoginVkActivity extends AppCompatActivity {
         private final String phone;
         private final String screen_name;
         private final String access_token;
-        private final String expire_in;
+        private final int expire_in;
 
 
         public static class Builder implements Serializable {
@@ -305,7 +309,7 @@ public class LoginVkActivity extends AppCompatActivity {
             private String phone;
             private String screen_name;
             private String access_token;
-            private String expire_in;
+            private int expire_in;
 
             public void setTokenReplacementTimeStamp(long tokenReplacementTimeStamp) {
                 this.tokenReplacementTimeStamp = tokenReplacementTimeStamp;
@@ -351,7 +355,7 @@ public class LoginVkActivity extends AppCompatActivity {
                 this.screen_name = screen_name;
             }
 
-            public void setExpire_in(String expire_in) {
+            public void setExpireIn(int expire_in) {
                 this.expire_in = expire_in;
             }
 

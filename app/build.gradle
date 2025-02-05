@@ -10,8 +10,8 @@ android {
         applicationId "com.alaka_ala.florafilm"
         minSdk 26
         targetSdk 34
-        versionCode 6
-        versionName "v1.0.6"
+        versionCode 7
+        versionName "v1.0.7"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -64,9 +64,6 @@ dependencies {
     implementation 'jp.wasabeef:blurry:4.0.1'
 
     implementation 'com.github.vivchar:RendererRecyclerViewAdapter:3.0.2'
-
-    implementation 'com.github.HaarigerHarald:android-youtubeExtractor:2.1.0'
-
 
 
 

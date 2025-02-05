@@ -17,20 +17,14 @@
             android:orientation="vertical">
 
             <include
-                android:id="@+id/layoutNewFilm"
-                layout="@layout/layout_rv_home_new_film"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <include
-                android:id="@+id/layoutVpNewsMedia"
-                layout="@layout/layout_home_vp_news_media"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <include
                 android:id="@+id/layoutRvTopTvShow"
                 layout="@layout/layout_rv_home_top_tv_show"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <include
+                android:id="@+id/layoutRvPopularMovie"
+                layout="@layout/layout_rv_home_popular_movie"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
@@ -47,16 +41,23 @@
                 android:layout_height="wrap_content" />
 
             <include
+                android:id="@+id/layoutNewFilm"
+                layout="@layout/layout_rv_home_new_film"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <include
                 android:id="@+id/layoutRvCcategoryChips"
                 layout="@layout/layout_rv_home_chips_category"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
 
             <include
-                android:id="@+id/layoutRvPopularMovie"
-                layout="@layout/layout_rv_home_popular_movie"
+                android:id="@+id/layoutVpNewsMedia"
+                layout="@layout/layout_home_vp_news_media"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
