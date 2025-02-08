@@ -10,7 +10,11 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,16 +39,16 @@ import java.util.List;
 import java.util.Map;
 
 
-public class PlaylistGroupFragment extends Fragment {
+public class PlaylistGroupFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private FragmentPlaylistGroupBinding binding;
     private VKVideo.PlaylistGroupItem playlistGroupItem;
     private VKVideo.VideoItem groupVideoItem;
     private VKVideo vkVideo;
-    private static final ArrayList<VKVideo.VideoItem> videos = new ArrayList<>();
+    private static ArrayList<VKVideo.VideoItem> videos = new ArrayList<>();
     private AdapterVideos adapterVideos;
     private Button buttonPlayAll;
     private ConstraintLayout nullDatalayoutRoot;
-
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -52,7 +56,8 @@ public class PlaylistGroupFragment extends Fragment {
         binding = FragmentPlaylistGroupBinding.inflate(inflater, container, false);
         buttonPlayAll = binding.buttonPlayAll;
         nullDatalayoutRoot = binding.nullDatalayout.getRoot();
-
+        swipeRefreshLayout = binding.swipeRefreshLayout;
+        swipeRefreshLayout.setOnRefreshListener(this);
 
 
         assert getArguments() != null;
@@ -115,12 +120,15 @@ public class PlaylistGroupFragment extends Fragment {
         return binding.getRoot();
     }
 
+
+    private RecyclerView rvItemPlaylist;
     private void groupPlaylistVideoCreate() {
         vkVideo = new VKVideo(AccountManager.getAccessToken(getContext()));
 
         ImageView app_bar_image_film_poster = binding.appBarImageFilmPoster;
         Picasso.get().load(playlistGroupItem.getImages().get(playlistGroupItem.getImages().size() - 1).getUrl()).into(app_bar_image_film_poster);
-        RecyclerView rvItemPlaylist = binding.rvItemPlaylist;
+
+        rvItemPlaylist = binding.rvItemPlaylist;
 
         rvItemPlaylist.setLayoutManager(new LinearLayoutManager(getContext()));
         rvItemPlaylist.setAdapter(adapterVideos = new AdapterVideos());
@@ -208,6 +216,37 @@ public class PlaylistGroupFragment extends Fragment {
             @Override
             public void onError(Exception e) {
 
+            }
+        });
+    }
+
+    private boolean isUpdate = false;
+    @Override
+    public void onRefresh() {
+        Handler handler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public boolean handleMessage(@NonNull Message msg) {
+                if (!videos.isEmpty() && adapterVideos != null && msg.what == 1) {
+                    adapterVideos.notifyDataSetChanged();
+                }
+                swipeRefreshLayout.setRefreshing(false);
+                isUpdate = false;
+                return false;
+            }
+        });
+        isUpdate = true;
+        vkVideo.getVideosGroup(String.valueOf(playlistGroupItem.getOwnerId()), String.valueOf(playlistGroupItem.getId()), videos.size(), new VKVideo.GetAllVideosGroupCallback() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onSuccess(ArrayList<VKVideo.VideoItem> vds) {
+                videos.addAll(videos.size(), vds);
+                handler.sendEmptyMessage(1);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                handler.sendEmptyMessage(0);
             }
         });
     }

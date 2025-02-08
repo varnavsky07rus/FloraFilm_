@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-
-
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbar"
-
         android:layout_width="match_parent"
         android:layout_height="250dp"
         android:background="#00FFFFFF"
@@ -21,7 +18,6 @@
             android:layout_height="match_parent"
             android:layout_marginBottom="0dp"
             android:layout_weight="1"
-
             android:foreground="@drawable/gradient_poster"
             app:contentScrim="?attr/colorPrimary"
             app:layout_scrollFlags="scroll"
@@ -31,7 +27,6 @@
                 android:id="@+id/app_bar_image_film_poster"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-
                 android:scaleType="centerCrop"
                 android:src="@drawable/sad_rounded_square_emoticon" />
 
@@ -79,13 +74,19 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvItemPlaylist"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
-        tools:visibility="visible" />
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvItemPlaylist"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            tools:visibility="visible" />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <include
         android:id="@+id/nullDatalayout"
@@ -95,6 +96,5 @@
         android:layout_gravity="center"
         android:layout_marginTop="100dp"
         android:visibility="gone" />
-
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
