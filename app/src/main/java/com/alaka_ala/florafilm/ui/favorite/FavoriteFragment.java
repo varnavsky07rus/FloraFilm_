@@ -46,9 +46,9 @@ public class FavoriteFragment extends Fragment {
 
 
         if (collection.getItems().isEmpty()) {
-            adapter = new UniversalRecyclerAdapter(getLayoutInflater(), utilsFavoriteAndViewFilm, collection, UniversalRecyclerAdapter.TYPE_NULL_DATA);
+            adapter = new UniversalRecyclerAdapter(rvFavorite, getLayoutInflater(), utilsFavoriteAndViewFilm, collection, UniversalRecyclerAdapter.TYPE_NULL_DATA);
         } else {
-            adapter = new UniversalRecyclerAdapter(getLayoutInflater(), utilsFavoriteAndViewFilm, collection, UniversalRecyclerAdapter.TYPE_FULL_WIDTH);
+            adapter = new UniversalRecyclerAdapter(rvFavorite, getLayoutInflater(), utilsFavoriteAndViewFilm, collection, UniversalRecyclerAdapter.TYPE_FULL_WIDTH);
         }
 
         if (collection.getItems().isEmpty()) {

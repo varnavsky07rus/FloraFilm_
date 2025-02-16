@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 /**Супруги актёра/актрисы.*/
 public class StaffSpouseItem implements Serializable {
-    public StaffSpouseItem(String personId, String webUrl, String name, String sex) {
+    public StaffSpouseItem(int personId, String webUrl, String name, String sex) {
         this.personId = personId;
         this.webUrl = webUrl;
         this.name = name;
@@ -15,7 +15,7 @@ public class StaffSpouseItem implements Serializable {
 
 
     private final String posterUrl;
-    private final String personId;
+    private final int personId;
     private final String webUrl;
     private final String name;
     private final String sex;
@@ -32,7 +32,7 @@ public class StaffSpouseItem implements Serializable {
         return webUrl;
     }
 
-    public String getPersonId() {
+    public int getPersonId() {
         return personId;
     }
 

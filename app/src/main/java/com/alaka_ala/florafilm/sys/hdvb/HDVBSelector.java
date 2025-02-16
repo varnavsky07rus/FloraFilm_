@@ -13,7 +13,10 @@ import com.alaka_ala.florafilm.sys.hdvb.models.HDVBFilm;
 import com.alaka_ala.florafilm.sys.hdvb.models.HDVBSerial;
 import com.alaka_ala.florafilm.sys.vibix.VibixSelector;
 import com.alaka_ala.florafilm.ui.player.exo.ExoActivity;
+import com.alaka_ala.florafilm.ui.player.exo.models.EPData;
 import com.google.android.material.snackbar.Snackbar;
+
+import java.util.ArrayList;
 
 public class HDVBSelector {
     public interface SelectorListener {
@@ -65,6 +68,7 @@ public class HDVBSelector {
     }
 
     private Activity activity;
+
     public void buildSelector(Activity activity) {
         this.activity = activity;
         if (CURRENT_TYPE_CONTENT.equals("FILM")) {
@@ -114,13 +118,11 @@ public class HDVBSelector {
                         linearLayoutTitleClick2.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View vQuality) {
-                                /*Intent intent = new Intent(activity, PlayerWebActivity.class);
-                                intent.putExtra("url", urlVideo);
-                                intent.putExtra("poster", film.getPoster());
-                                activity.startActivity(intent);*/
-
                                 Intent intent = new Intent(activity, ExoActivity.class);
-                                intent.putExtra("film", film);
+
+                                EPData.Film film_extras = getFilmExtras();
+
+                                intent.putExtra("film", film_extras);
                                 intent.putExtra("indexTranslation", vTranslation.getId());
                                 intent.putExtra("titleQuality", titleQuality);
                                 intent.putExtra("indexQuality", vQuality.getId());
@@ -128,6 +130,28 @@ public class HDVBSelector {
                                 activity.startActivity(intent);
 
 
+
+                            }
+
+                            private EPData.Film getFilmExtras() {
+                                EPData.Film.Builder builderFilm = new EPData.Film.Builder();
+                                builderFilm.setPoster(film.getHdvbDataFilm().getPoster());
+                                builderFilm.setId(film.getHdvbDataFilm().getId());
+                                for (int j = 0; j < film.getBlockList().size(); j++) {
+                                    String country = film.getBlockList().get(j).getCountry();
+                                    EPData.Block block = new EPData.Block(country);
+                                    builderFilm.addBlock(block);
+                                }
+                                ArrayList<EPData.Film.Translations> translations = new ArrayList<>();
+                                for (int j = 0; j < film.getHdvbDataFilm().getTranslations().size(); j++) {
+                                    String titleTranslation = film.getHdvbDataFilm().getTranslations().get(j).getTitle();
+                                    EPData.Film.Translations.Builder translation = new EPData.Film.Translations.Builder();
+                                    translation.setTitle(titleTranslation);
+                                    translation.setVideoData(film.getHdvbDataFilm().getTranslations().get(j).getVideoData());
+                                    translations.add(translation.build());
+                                }
+                                builderFilm.setTranslations(translations);
+                                return builderFilm.build();
                             }
                         });
 
@@ -215,7 +239,8 @@ public class HDVBSelector {
                                                     @Override
                                                     public void onClick(View vQuality) {
                                                         Intent intent = new Intent(activity, ExoActivity.class);
-                                                        intent.putExtra("serial", serial);
+                                                        EPData.Serial serial_extras = getSerialExtras();
+                                                        intent.putExtra("serial", serial_extras);
                                                         intent.putExtra("titleQuality", titleQuality);
                                                         intent.putExtra("indexQuality", vQuality.getId());
                                                         intent.putExtra("indexSeason", vSeason.getId());
@@ -224,8 +249,26 @@ public class HDVBSelector {
                                                         intent.putExtra("urlVideo", urlVideo);
                                                         activity.startActivity(intent);
 
+                                                    }
 
-                                                        Snackbar.make(root, "tapToIndex:" + vQuality.getId() + " | url:" + urlVideo, Snackbar.LENGTH_SHORT).show();
+                                                    private EPData.Serial getSerialExtras() {
+                                                        EPData.Serial.Builder builderSerial = new EPData.Serial.Builder();
+
+                                                        for (int j = 0; j < serial.getBlockList().size(); j++) {
+                                                            String country = serial.getBlockList().get(j).getCountry();
+                                                            EPData.Block block = new EPData.Block(country);
+                                                            builderSerial.addBlock(block);
+                                                        }
+
+                                                        ArrayList<EPData.Serial.Season> seasons = new ArrayList<>();
+                                                        for (int j = 0; j < serial.getHdvbDataSerial().getSeasons().size(); j++) {
+                                                            EPData.Serial.Season.Builder season = new EPData.Serial.Season.Builder();
+                                                            season.setTitle(serial.getHdvbDataSerial().getSeasons().get(j).getTitle());
+                                                            season.setEpisodes(serial.getHdvbDataSerial().getSeasons().get(j).getEpisodes());
+                                                            seasons.add(season.build());
+                                                        }
+                                                        builderSerial.setSeasons(seasons);
+                                                        return builderSerial.build();
                                                     }
                                                 });
 

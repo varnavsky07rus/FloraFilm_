@@ -123,7 +123,7 @@ public class VKViewPagerFragment extends Fragment {
     private void createPlayer() {
         String file480Preview = videoItem.getTrailers().getMp4_480();
         Map<String, String> headers = new HashMap<>();
-        headers.put("User-Agent", LoginVkActivity.USER_AGENT_KATE);
+        headers.put("User-Agent", LoginVkActivity.USER_AGENT);
         videoView.setVideoURI(Uri.parse(file480Preview), headers);
         videoView.start();
 

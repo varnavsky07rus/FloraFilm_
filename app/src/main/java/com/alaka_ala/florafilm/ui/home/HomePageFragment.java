@@ -16,6 +16,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -74,10 +75,9 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
 
     //private MyRecyclerViewItemTouchListener onItemClickListenerPopularAll;
     private MyRecyclerViewItemTouchListener onItemClickListenerTvShow250;
-    //private MyRecyclerViewItemTouchListener onItemClickListenerMovie250;
-    //private MyRecyclerViewItemTouchListener onItemClickListenerComics;
+    private MyRecyclerViewItemTouchListener onItemClickListenerMovie250;
+    private MyRecyclerViewItemTouchListener onItemClickListenerComics;
     private MyRecyclerViewItemTouchListener onItemClickListenerPopularOnlyMovies;
-
 
 
     private static final Map<String, Collection> collections = new HashMap<>();
@@ -192,7 +192,6 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
         swipeRefreshLayout = binding.getRoot();
 
 
-
         onClickChipListener();
         onClickTextViewListenersMore();
 
@@ -205,6 +204,7 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
         rvPopularOnlyMovie.setLayoutManager(new GridLayoutManager(getContext(), 3, GridLayoutManager.VERTICAL, false));
 
         nstdScrollView.setScrollY(positionNestedScrollView);
+
 
 
         AsyncThreadBuilder threadBuilder;
@@ -276,7 +276,7 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
             }
         }));
 
-        /*rvTopMovie250.removeOnItemTouchListener(onItemClickListenerMovie250);
+        rvTopMovie250.removeOnItemTouchListener(onItemClickListenerMovie250);
         rvTopMovie250.addOnItemTouchListener(onItemClickListenerMovie250 = new MyRecyclerViewItemTouchListener(getContext(), rvTopMovie250, new MyRecyclerViewItemTouchListener.OnItemClickListener() {
             @Override
             public void onItemClick(RecyclerView.ViewHolder holder, View view, int position) {
@@ -289,7 +289,7 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
             public void onLongItemClick(RecyclerView.ViewHolder holder, View view, int position) {
                 showPopUpMenu(holder, view, position);
             }
-        }));*/
+        }));
 
         rvPopularOnlyMovie.removeOnItemTouchListener(onItemClickListenerPopularOnlyMovies);
         rvPopularOnlyMovie.addOnItemTouchListener(onItemClickListenerPopularOnlyMovies = new MyRecyclerViewItemTouchListener(getContext(), rvPopularOnlyMovie, new MyRecyclerViewItemTouchListener.OnItemClickListener() {
@@ -306,7 +306,7 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
             }
         }));
 
-        /*rvComics.removeOnItemTouchListener(onItemClickListenerComics);
+        rvComics.removeOnItemTouchListener(onItemClickListenerComics);
         rvComics.addOnItemTouchListener(onItemClickListenerComics = new MyRecyclerViewItemTouchListener(getContext(), rvComics, new MyRecyclerViewItemTouchListener.OnItemClickListener() {
             @Override
             public void onItemClick(RecyclerView.ViewHolder holder, View view, int position) {
@@ -319,7 +319,7 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
             public void onLongItemClick(RecyclerView.ViewHolder holder, View view, int position) {
                 showPopUpMenu(holder, view, position);
             }
-        }));*/
+        }));
 
     }
 
@@ -333,16 +333,16 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
         rvTopTvShow250.addOnItemTouchListener(onItemClickListenerTvShow250);
 
 
-        /*rvTopMovie250.setAdapter(adapterMovie250);
-        rvTopMovie250.addOnItemTouchListener(onItemClickListenerMovie250);*/
+        rvTopMovie250.setAdapter(adapterMovie250);
+        rvTopMovie250.addOnItemTouchListener(onItemClickListenerMovie250);
 
 
         rvPopularOnlyMovie.setAdapter(adapterPopularOnlyMovies);
         rvPopularOnlyMovie.addOnItemTouchListener(onItemClickListenerPopularOnlyMovies);
 
 
-        /*rvComics.setAdapter(adapterComics);
-        rvComics.addOnItemTouchListener(onItemClickListenerComics);*/
+        rvComics.setAdapter(adapterComics);
+        rvComics.addOnItemTouchListener(onItemClickListenerComics);
 
 
     }
@@ -384,7 +384,9 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
                 @Override
                 public void onSuccess(Collection collection) {
                     collections.put(collection.getTitleCollection(), collection);
-                    rvTopTvShow250.setAdapter(adapterTvShow250 = new UniversalRecyclerAdapter(getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_HOLDER_SMALL_POSTER));
+                    if (isAdded()) {
+                        rvTopTvShow250.setAdapter(adapterTvShow250 = new UniversalRecyclerAdapter(rvTopTvShow250, getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_HOLDER_SMALL_POSTER));
+                    }
                 }
 
                 @Override
@@ -403,12 +405,15 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
 
         }
 
-        /*if (!collections.containsKey(Collection.TITLE_TOP_250_MOVIES)) {
+        if (!collections.containsKey(Collection.TITLE_TOP_250_MOVIES)) {
             kinopoiskAPI.getListTop250Movies(page, new KinopoiskAPI.RequestCallbackCollection() {
                 @Override
                 public void onSuccess(Collection collection) {
                     collections.put(collection.getTitleCollection(), collection);
-                    rvTopMovie250.setAdapter(adapterMovie250 = new UniversalRecyclerAdapter(getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_HOLDER_SMALL_POSTER));
+                    if (isAdded()) {
+                        rvTopMovie250.setAdapter(adapterMovie250 = new UniversalRecyclerAdapter(rvTopMovie250, getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_HOLDER_SMALL_POSTER));
+                    }
+
                 }
 
                 @Override
@@ -424,15 +429,16 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
         } else {
             rvTopMovie250.setAdapter(adapterMovie250);
             rvTopMovie250.addOnItemTouchListener(onItemClickListenerMovie250);
+        }
 
-        }*/
-
-        /*if (!collections.containsKey(Collection.TITLE_COMICS_THEME)) {
+        if (!collections.containsKey(Collection.TITLE_COMICS_THEME)) {
             kinopoiskAPI.getListComicsTheme(page, new KinopoiskAPI.RequestCallbackCollection() {
                 @Override
                 public void onSuccess(Collection collection) {
                     collections.put(collection.getTitleCollection(), collection);
-                    rvComics.setAdapter(adapterComics = new UniversalRecyclerAdapter(getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_HOLDER_SMALL_POSTER));
+                    if (isAdded()) {
+                        rvComics.setAdapter(adapterComics = new UniversalRecyclerAdapter(rvComics, getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_HOLDER_SMALL_POSTER));
+                    }
                 }
 
                 @Override
@@ -448,14 +454,21 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
         } else {
             rvComics.setAdapter(adapterComics);
             rvComics.addOnItemTouchListener(onItemClickListenerComics);
-        }*/
+        }
 
         if (!collections.containsKey(Collection.TITLE_POPULAR_MOVIES)) {
             kinopoiskAPI.getListTopPopularMovies(page, new KinopoiskAPI.RequestCallbackCollection() {
                 @Override
                 public void onSuccess(Collection collection) {
+                    // Удаляем 2 элемента видео из коллекции что бы на странице главной отображалось корректно все.
+                    if (collection.getItems().size() > 2) {
+                        collection.getItems().remove(collection.getItems().size() - 1);
+                        collection.getItems().remove(collection.getItems().size() - 2);
+                    }
                     collections.put(collection.getTitleCollection(), collection);
-                    rvPopularOnlyMovie.setAdapter(adapterPopularOnlyMovies = new UniversalRecyclerAdapter(getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_FULL_WIDTH));
+                    if (isAdded()) {
+                        rvPopularOnlyMovie.setAdapter(adapterPopularOnlyMovies = new UniversalRecyclerAdapter(rvPopularOnlyMovie, getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_FULL_WIDTH));
+                    }
                 }
 
                 @Override
@@ -694,14 +707,12 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
         popupMenu.setForceShowIcon(true);
         if (isFavorite) {
             popupMenu.getMenu().findItem(R.id.add_to_favorite).setVisible(false);
-        }
-        else {
+        } else {
             popupMenu.getMenu().findItem(R.id.remove_is_forever).setVisible(false);
         }
         if (isViewed) {
             popupMenu.getMenu().findItem(R.id.add_to_view).setVisible(false);
-        }
-        else {
+        } else {
             popupMenu.getMenu().findItem(R.id.remove_is_view).setVisible(false);
         }
 
@@ -747,9 +758,7 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
                     return false;
                 }
             });
-        }
-
-        else if (holder instanceof UniversalRecyclerAdapter.ViewHolderSmallPoster) {
+        } else if (holder instanceof UniversalRecyclerAdapter.ViewHolderSmallPoster) {
             popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
@@ -790,9 +799,7 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
                     return false;
                 }
             });
-        }
-
-        else if (holder instanceof UniversalRecyclerAdapter.ViewHolderFullWidth) {
+        } else if (holder instanceof UniversalRecyclerAdapter.ViewHolderFullWidth) {
             popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
@@ -834,7 +841,6 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
                 }
             });
         }
-
         popupMenu.show();
     }
 
@@ -850,4 +856,8 @@ public class HomePageFragment extends Fragment implements KinopoiskAPI.RequesCal
 
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
 }

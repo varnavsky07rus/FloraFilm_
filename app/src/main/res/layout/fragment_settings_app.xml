@@ -324,16 +324,45 @@
                         android:layout_height="wrap_content"
                         tools:text="Версия приложения: 1.0.0" />
 
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chipFindUpdate"
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="64dp"
-                        android:text="Проверить обновление"
-                        android:textAlignment="center"
-                        app:chipIcon="@drawable/rounded_deployed_code_update_24"
-                        app:chipIconSize="24dp"
-                        app:chipIconTint="?attr/IconTintColorDayNightTheme"
-                        app:textEndPadding="16dp" />
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipFindUpdate"
+                            android:layout_width="match_parent"
+                            android:layout_height="64dp"
+                            android:layout_weight="1"
+                            android:text="Проверить обновление"
+                            android:textAlignment="center"
+                            app:chipIcon="@drawable/rounded_deployed_code_update_24"
+                            app:chipIconSize="24dp"
+                            app:chipIconTint="?attr/IconTintColorDayNightTheme"
+                            app:textEndPadding="16dp" />
+
+                        <View
+                            android:id="@+id/divider9"
+                            android:layout_width="1dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginStart="4dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginEnd="4dp"
+                            android:layout_marginBottom="8dp"
+                            android:layout_weight="0"
+                            android:background="?android:attr/listDivider" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipCommitsApp"
+                            android:layout_width="match_parent"
+                            android:layout_height="64dp"
+                            android:layout_weight="1"
+                            android:text="История обновлений"
+                            app:chipIcon="@drawable/rounded_commit_24"
+                            app:chipIconSize="24dp"
+                            app:chipIconTint="?attr/IconTintColorDayNightTheme" />
+                    </LinearLayout>
+
                 </LinearLayout>
             </FrameLayout>
 

@@ -91,6 +91,12 @@ public class MainActivity extends AppCompatActivity {
         );
 
 
+        /*// Проверяем, запущено ли приложение на телевизоре
+        if (getResources().getConfiguration().uiMode == Configuration.UI_MODE_TYPE_TELEVISION) {
+            // Фиксируем портретную ориентацию
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }*/
+
 
 
 
@@ -228,11 +234,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void fullscreenAppMode(boolean fullScreen, boolean isManualEdit) {
         // Скрывает верхнюю строку состояния
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(binding.drawerLayout.getId()), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
         if (fullScreen) {
             EdgeToEdge.enable(this);
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -320,6 +321,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        //this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }
 }

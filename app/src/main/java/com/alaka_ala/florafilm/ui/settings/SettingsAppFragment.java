@@ -8,6 +8,7 @@ import android.os.Bundle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -148,11 +149,20 @@ public class SettingsAppFragment extends Fragment {
 
                     @Override
                     public void findError(String error) {
-                        new MaterialAlertDialogBuilder(getContext()).setMessage(error).show();
+                        Snackbar.make(getView(), error, Snackbar.LENGTH_LONG).show();
                     }
                 });
             }
         });
+
+        Chip chipCommitsApp = binding.chipCommitsApp;
+        chipCommitsApp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Navigation.findNavController(v).navigate(R.id.action_settingsAppFragment_to_commitsAppFragment);
+            }
+        });
+
 
 
         MaterialSwitch switchHideAppBarLayout = binding.switchHideAppBarLayout;

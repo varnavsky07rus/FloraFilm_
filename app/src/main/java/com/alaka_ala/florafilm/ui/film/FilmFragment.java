@@ -3,34 +3,50 @@ package com.alaka_ala.florafilm.ui.film;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.os.Handler;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.alaka_ala.florafilm.R;
 import com.alaka_ala.florafilm.databinding.FragmentFilmBinding;
+import com.alaka_ala.florafilm.sys.hdvb.HDVB;
+import com.alaka_ala.florafilm.sys.hdvb.HDVBSelector;
+import com.alaka_ala.florafilm.sys.hdvb.models.HDVBFilm;
+import com.alaka_ala.florafilm.sys.hdvb.models.HDVBSerial;
 import com.alaka_ala.florafilm.sys.kinovibe.KinoVibe;
 import com.alaka_ala.florafilm.sys.kp_api.ItemFilmInfo;
 import com.alaka_ala.florafilm.sys.kp_api.KinopoiskAPI;
 import com.alaka_ala.florafilm.sys.kp_api.ListFilmItem;
 import com.alaka_ala.florafilm.sys.kp_api.ListStaffItem;
+import com.alaka_ala.florafilm.sys.utils.MyRecyclerViewItemTouchListener;
 import com.alaka_ala.florafilm.sys.utils.PersonsRecyclerAdapter;
 import com.alaka_ala.florafilm.sys.utils.UtilsFavoriteAndViewFilm;
 import com.alaka_ala.florafilm.sys.vibix.Vibix;
 import com.alaka_ala.florafilm.sys.vibix.VibixSelector;
+import com.alaka_ala.florafilm.ui.film.actors.ActorFragment;
 import com.alaka_ala.florafilm.ui.film.vk_pager.AdapterViewPager2VkFiles;
+import com.alaka_ala.florafilm.ui.player.exo.ExoActivity;
 import com.alaka_ala.florafilm.ui.player.exo.models.EPData;
 import com.alaka_ala.florafilm.ui.vk.AccountManager;
 import com.alaka_ala.florafilm.ui.vk.parser.VKVideo;
@@ -38,7 +54,10 @@ import com.google.android.material.snackbar.Snackbar;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 
 public class FilmFragment extends Fragment implements Vibix.ConnectionVibix {
@@ -56,12 +75,19 @@ public class FilmFragment extends Fragment implements Vibix.ConnectionVibix {
     private ImageView imageViewLogoFilm;
     private TextView textViewNameFilm;
     private TextView textViewDescriptionFilm;
+    private TextView textViewRatingKp;
+    private TextView textViewVoteCountKp;
+    private TextView textViewCountries;
+
     private CardView progressBar;
     private Vibix vibix;
     private KinoVibe kinoVibe;
     private VKVideo vkVideo;
     private LinearLayout linearLayoutContent;
+    private LinearLayout linearLayoutRatings;
     private UtilsFavoriteAndViewFilm utilsFavoriteAndViewFilm;
+
+
     @SuppressLint("SetTextI18n")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -77,12 +103,37 @@ public class FilmFragment extends Fragment implements Vibix.ConnectionVibix {
         if (bundle == null) return binding.getRoot();
         film = (ListFilmItem) bundle.getSerializable("film");
         if (film == null) return binding.getRoot();
+        switch (film.getType()) {
+            case "FILM":
+                TYPE_CONTENT = "(фильм)";
+                break;
+            case "TV_SERIES":
+            case "TV_SHOW":
+            case "MINI_SERIES":
+            case "ANIME":
+                TYPE_CONTENT = "(сериал)";
+                break;
+            case "null":
+                TYPE_CONTENT = "";
+                break;
+        }
+        // Получаем ActionBar из Activity
+        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(!film.getNameRu().isEmpty() ? film.getNameRu() + TYPE_CONTENT : film.getNameEn() + TYPE_CONTENT);
+        }
+
 
         appBarImage = binding.appBarImage;
         imageViewLogoFilm = binding.imageViewLogoFilm;
         textViewNameFilm = binding.textViewNameFilm;
         textViewDescriptionFilm = binding.textViewDescriptionFilm;
         progressBar = binding.cardViewProgressBar;
+        textViewRatingKp = binding.textViewRatingKp;
+        textViewVoteCountKp = binding.textViewVoteCountKp;
+        linearLayoutRatings = binding.linearLayoutRatings;
+        textViewCountries = binding.textViewCountries;
+
 
         getKinopoiskData();
 
@@ -90,11 +141,283 @@ public class FilmFragment extends Fragment implements Vibix.ConnectionVibix {
 
         getVKData(inflater);
 
+        getHdvbData();
 
-
-
+        getKinoVibeData();
 
         return binding.getRoot();
+    }
+
+    private void getKinoVibeData() {
+        kinoVibe = new KinoVibe();
+        kinoVibe.parse(film.getKinopoiskId(), new KinoVibe.ConnectionKinoVibe() {
+            @Override
+            public void startParse() {
+
+            }
+
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void finishParse(String file) {
+                if (getContext() == null) return;
+                if (file.isEmpty()) return;
+                LayoutInflater inflater = getLayoutInflater();
+                // Добавляем название балансера на страницу фильма
+                View layout_film_files = inflater.inflate(R.layout.layout_film_files, null, false);
+                LinearLayout linearLayoutTitleFiles = layout_film_files.findViewById(R.id.linearLayoutTitleFiles);
+                ImageView imageViewArrowFiles = layout_film_files.findViewById(R.id.imageViewArrowFiles);
+                TextView textViewTitleBalancer = layout_film_files.findViewById(R.id.textViewTitleBalancer);
+                String title = "[KinoVibe] [VPN]";
+                textViewTitleBalancer.setText(title);
+                LinearLayout root = layout_film_files.findViewById(R.id.linearLayoutRootGroups);
+                linearLayoutTitleFiles.setOnClickListener(new View.OnClickListener() {
+                    boolean isAnimate = false;
+                    @Override
+                    public void onClick(View v) {
+                        if (isAnimate) return;
+                        if (root.getVisibility() == View.VISIBLE) {
+                            // Скрываем все элементы
+                            imageViewArrowFiles.animate().setListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationStart(Animator animation) {
+                                    super.onAnimationStart(animation);
+                                    isAnimate = true;
+                                }
+
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    super.onAnimationEnd(animation);
+                                    isAnimate = false;
+                                    if (root.getChildCount() > 0) {
+                                        root.removeAllViews();
+                                    }
+                                    root.setVisibility(View.GONE);
+                                }
+                            }).rotation(0).start();
+                        } else {
+                            // Показываем все элементы
+                            imageViewArrowFiles.animate().setListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationStart(Animator animation) {
+                                    super.onAnimationStart(animation);
+                                    isAnimate = true;
+                                }
+
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    super.onAnimationEnd(animation);
+                                    isAnimate = false;
+                                    // Добавляем слой с названием озвучки
+                                    View folderLayout = getLayoutInflater().inflate(R.layout.selector_film_item_1, null, false);
+                                    TextView textViewTitleFolder = folderLayout.findViewById(R.id.textViewTitleFolder);
+                                    textViewTitleFolder.setText("Неизвестный перевод");
+                                    LinearLayout linearLayoutTitleClick = folderLayout.findViewById(R.id.linearLayoutTitleClick);
+                                    LinearLayout linearLayoutFf = folderLayout.findViewById(R.id.linearLayoutFf);
+                                    linearLayoutTitleClick.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            // Добавляем слой с названием файла
+                                            if (linearLayoutFf.getChildCount() > 0) {
+                                                linearLayoutFf.setVisibility(View.GONE);
+                                                linearLayoutFf.removeAllViews();
+                                                return;
+                                            }
+                                            linearLayoutFf.setVisibility(View.VISIBLE);
+                                            View fileLayout = getLayoutInflater().inflate(R.layout.selector_film_item_2, null, false);
+                                            TextView textViewTitleFiles = fileLayout.findViewById(R.id.textViewTitleFiles);
+                                            textViewTitleFiles.setText("SD");
+                                            LinearLayout linearLayoutTitleClick2 = fileLayout.findViewById(R.id.linearLayoutTitleClick2);
+                                            linearLayoutFf.addView(fileLayout);
+
+                                            linearLayoutTitleClick2.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View v) {
+                                                    EPData.Film.Builder builderFilm = new EPData.Film.Builder();
+                                                    builderFilm.setId(String.valueOf(film.getKinopoiskId()));
+                                                    builderFilm.setPoster(film.getPosterUrl());
+
+                                                    EPData.Film.Translations.Builder builderTranslations = new EPData.Film.Translations.Builder();
+                                                    builderTranslations.setTitle("Неизвестный перевод");
+                                                    List<Map.Entry<String, String>> videoData = new ArrayList<>();
+                                                    videoData.add(new AbstractMap.SimpleEntry<>("(SD) MP4", file));
+                                                    builderTranslations.setVideoData(videoData);
+                                                    ArrayList<EPData.Film.Translations> translations = new ArrayList<>();
+                                                    translations.add(builderTranslations.build());
+                                                    builderFilm.setTranslations(translations);
+
+                                                    Intent intent = new Intent(getActivity(), ExoActivity.class);
+                                                    intent.putExtra("film", builderFilm.build());
+                                                    intent.putExtra("indexTranslation", 0);
+                                                    intent.putExtra("titleQuality", 0);
+                                                    intent.putExtra("indexQuality", 0);
+                                                    intent.putExtra("urlVideo", file);
+                                                    getActivity().startActivity(intent);
+
+                                                }
+                                            });
+                                        }
+                                    });
+                                    root.addView(folderLayout);
+                                    root.setVisibility(View.VISIBLE);
+                                }
+                            }).rotation(90).start();
+                        }
+                    }
+                });
+                linearLayoutContent.addView(layout_film_files);
+
+
+
+            }
+
+            @Override
+            public void errorParse(String err, int code) {
+                if (getContext() == null) return;
+                /*if (code != 404) {
+                    Snackbar.make(getView(), "KinoVibe: " + err, 5000).show();
+                }*/
+            }
+        });
+    }
+
+    private void getHdvbData() {
+        HDVB hdvb = new HDVB(getResources().getString(R.string.api_key_hdvb));
+        hdvb.parse(film.getKinopoiskId(), new HDVB.ResultParseCallback() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void serial(HDVBSerial serial) {
+                if (serial == null) return;
+                LayoutInflater inflater = getLayoutInflater();
+                View layout_film_files = inflater.inflate(R.layout.layout_film_files, null, false);
+                LinearLayout linearLayoutTitleFiles = layout_film_files.findViewById(R.id.linearLayoutTitleFiles);
+                ImageView imageViewArrowFiles = layout_film_files.findViewById(R.id.imageViewArrowFiles);
+                TextView textViewTitleBalancer = layout_film_files.findViewById(R.id.textViewTitleBalancer);
+                StringBuilder blocks = new StringBuilder();
+                for (int i = 0; i < serial.getBlockList().size(); i++) {
+                    blocks.append(serial.getBlockList().get(i).getCountry());
+                    if (i != serial.getBlockList().size() - 1) blocks.append(", ");
+                }
+                String title = serial.getBlockList().isEmpty() ? "[HDVB]" : "\uD83D\uDD12[HDVB] [" + blocks + "]";
+                textViewTitleBalancer.setText(title);
+                LinearLayout root = layout_film_files.findViewById(R.id.linearLayoutRootGroups);
+                linearLayoutTitleFiles.setOnClickListener(new View.OnClickListener() {
+                    boolean isAnimate = false;
+                    @Override
+                    public void onClick(View v) {
+                        if (serial.getHdvbDataSerial().getSeasons().isEmpty()) {
+                            Snackbar.make(binding.getRoot(), "Файлы отсутствуют", Snackbar.LENGTH_SHORT).show();
+                        } else {
+                            if (isAnimate) return;
+                            if (root.getVisibility() == View.VISIBLE) {
+                                imageViewArrowFiles.animate().setListener(new AnimatorListenerAdapter() {
+                                    @Override
+                                    public void onAnimationStart(Animator animation) {
+                                        super.onAnimationStart(animation);
+                                        isAnimate = true;
+                                    }
+
+                                    @Override
+                                    public void onAnimationEnd(Animator animation) {
+                                        super.onAnimationEnd(animation);
+                                        isAnimate = false;
+                                        root.setVisibility(View.GONE);
+                                    }
+                                }).rotation(0).start();
+                            } else {
+                                imageViewArrowFiles.animate().setListener(new AnimatorListenerAdapter() {
+                                    @Override
+                                    public void onAnimationStart(Animator animation) {
+                                        super.onAnimationStart(animation);
+                                        isAnimate = true;
+                                    }
+
+                                    @Override
+                                    public void onAnimationEnd(Animator animation) {
+                                        super.onAnimationEnd(animation);
+                                        isAnimate = false;
+                                        root.setVisibility(View.VISIBLE);
+                                    }
+                                }).rotation(90).start();
+                            }
+                        }
+                    }
+                });
+                linearLayoutContent.addView(layout_film_files);
+
+                HDVBSelector hdvbSelector = new HDVBSelector(root, serial);
+                hdvbSelector.buildSelector(getActivity());
+            }
+
+            @Override
+            public void film(HDVBFilm film) {
+                if (film == null) return;
+                LayoutInflater inflater = getLayoutInflater();
+                View layout_film_files = inflater.inflate(R.layout.layout_film_files, null, false);
+                LinearLayout linearLayoutTitleFiles = layout_film_files.findViewById(R.id.linearLayoutTitleFiles);
+                ImageView imageViewArrowFiles = layout_film_files.findViewById(R.id.imageViewArrowFiles);
+                TextView textViewTitleBalancer = layout_film_files.findViewById(R.id.textViewTitleBalancer);
+                StringBuilder blocks = new StringBuilder();
+                for (int i = 0; i < film.getBlockList().size(); i++) {
+                    blocks.append(film.getBlockList().get(i).getCountry()).append(", ");
+                    if (i != film.getBlockList().size() - 1) blocks.append(", ");
+                }
+                String title = film.getBlockList().isEmpty() ? "[HDVB]" : "\uD83D\uDD12[HDVB] [" + blocks + "]";
+                textViewTitleBalancer.setText(title);
+                LinearLayout root = layout_film_files.findViewById(R.id.linearLayoutRootGroups);
+                linearLayoutTitleFiles.setOnClickListener(new View.OnClickListener() {
+                    boolean isAnimate = false;
+
+                    @Override
+                    public void onClick(View v) {
+                        if (film.getHdvbDataFilm().getTranslations().isEmpty()) {
+                            Snackbar.make(binding.getRoot(), "Файлы отсутствуют", Snackbar.LENGTH_SHORT).show();
+                        } else {
+                            if (isAnimate) return;
+                            if (root.getVisibility() == View.VISIBLE) {
+                                imageViewArrowFiles.animate().setListener(new AnimatorListenerAdapter() {
+                                    @Override
+                                    public void onAnimationStart(Animator animation) {
+                                        super.onAnimationStart(animation);
+                                        isAnimate = true;
+                                    }
+
+                                    @Override
+                                    public void onAnimationEnd(Animator animation) {
+                                        super.onAnimationEnd(animation);
+                                        isAnimate = false;
+                                        root.setVisibility(View.GONE);
+                                    }
+                                }).rotation(0).start();
+                            } else {
+                                imageViewArrowFiles.animate().setListener(new AnimatorListenerAdapter() {
+                                    @Override
+                                    public void onAnimationStart(Animator animation) {
+                                        super.onAnimationStart(animation);
+                                        isAnimate = true;
+                                    }
+
+                                    @Override
+                                    public void onAnimationEnd(Animator animation) {
+                                        super.onAnimationEnd(animation);
+                                        isAnimate = false;
+                                        root.setVisibility(View.VISIBLE);
+                                    }
+                                }).rotation(90).start();
+                            }
+                        }
+                    }
+                });
+                linearLayoutContent.addView(layout_film_files);
+
+                HDVBSelector hdvbSelector = new HDVBSelector(root, film);
+                hdvbSelector.buildSelector(getActivity());
+            }
+
+            @Override
+            public void error(String err) {
+
+            }
+        });
     }
 
     private void getVKData(LayoutInflater inflater) {
@@ -173,6 +496,7 @@ public class FilmFragment extends Fragment implements Vibix.ConnectionVibix {
         if (filmInfo == null) {
             kinopoiskAPI.getInforamationItem(kinopoiskId, new KinopoiskAPI.RequestCallbackInformationItem() {
                 KinopoiskAPI.RequestCallbackInformationItem requestCallbackInformationItem;
+
                 @Override
                 public void onSuccessInfoItem(ItemFilmInfo itemFilmInfo) {
                     requestCallbackInformationItem = this;
@@ -199,33 +523,40 @@ public class FilmFragment extends Fragment implements Vibix.ConnectionVibix {
         }
 
         if (listStaffItem == null) {
-            kinopoiskAPI.getListStaff(kinopoiskId, new KinopoiskAPI.RequestCallbackStaffList() {
-                KinopoiskAPI.RequestCallbackStaffList requestCallbackStaffList;
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
                 @Override
-                public void onSuccessStaffList(ArrayList<ListStaffItem> listStaffItems) {
-                    requestCallbackStaffList = this;
-                    listStaffItem = listStaffItems;
-                }
+                public void run() {
+                    kinopoiskAPI.getListStaff(kinopoiskId, new KinopoiskAPI.RequestCallbackStaffList() {
+                        KinopoiskAPI.RequestCallbackStaffList requestCallbackStaffList;
 
-                @Override
-                public void onFailureStaffList(IOException e) {
-                    if (getContext() == null) return;
-                    requestCallbackStaffList = this;
-                    Snackbar.make(binding.getRoot(), "Ошибка загрузки списка актёров. Повторите попытку...", 5000).setAction("Повторить", new View.OnClickListener() {
                         @Override
-                        public void onClick(View v) {
-                            kinopoiskAPI.getListStaff(kinopoiskId, requestCallbackStaffList);
+                        public void onSuccessStaffList(ArrayList<ListStaffItem> listStaffItems) {
+                            requestCallbackStaffList = this;
+                            listStaffItem = listStaffItems;
                         }
-                    }).show();
+
+                        @Override
+                        public void onFailureStaffList(IOException e) {
+                            if (getContext() == null) return;
+                            requestCallbackStaffList = this;
+                            Snackbar.make(binding.getRoot(), "Ошибка загрузки списка актёров. Повторите попытку...", 5000).setAction("Повторить", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    kinopoiskAPI.getListStaff(kinopoiskId, requestCallbackStaffList);
+                                }
+                            }).show();
+                        }
+
+                        @Override
+                        public void finishStafList() {
+                            createActors();
+                        }
+
+
+                    });
                 }
-
-                @Override
-                public void finishStafList() {
-                    createActors();
-                }
-
-
-            });
+            }, 500);
 
         } else {
             createActors();
@@ -282,9 +613,20 @@ public class FilmFragment extends Fragment implements Vibix.ConnectionVibix {
 
             }
         });
-        rvActors.setLayoutManager(new GridLayoutManager(getContext(), 3, GridLayoutManager.HORIZONTAL, false));
         if (getContext() == null) return;
+        rvActors.setLayoutManager(new GridLayoutManager(getContext(), 3, GridLayoutManager.HORIZONTAL, false));
         rvActors.setAdapter(new PersonsRecyclerAdapter(PersonsRecyclerAdapter.TYPE_HOLDER_MAIN_PERSON, listStaffItem, getLayoutInflater()));
+        rvActors.addOnItemTouchListener(new MyRecyclerViewItemTouchListener(getContext(), rvActors, new MyRecyclerViewItemTouchListener.OnItemClickListener() {
+            @Override
+            public void onItemClick(RecyclerView.ViewHolder holder, View view, int position) {
+                ActorFragment.newInstance(listStaffItem.get(position).getStaffId()).show(getChildFragmentManager(), "ActorFragment");
+            }
+
+            @Override
+            public void onLongItemClick(RecyclerView.ViewHolder holder, View view, int position) {
+
+            }
+        }));
     }
 
     @SuppressLint("SetTextI18n")
@@ -307,7 +649,7 @@ public class FilmFragment extends Fragment implements Vibix.ConnectionVibix {
         }
         String logoUrl = itemFilmInfo.getLogoUrl();
         String slogan = itemFilmInfo.getSlogan();
-        TYPE_CONTENT = itemFilmInfo.getType();
+
 
         // IMAGE POSTER
         if (!logoUrl.equals("null")) {
@@ -324,6 +666,17 @@ public class FilmFragment extends Fragment implements Vibix.ConnectionVibix {
         } else {
             textViewNameFilm.setText(name + " (" + year + ")");
         }
+
+        // Ratings
+        linearLayoutRatings.setVisibility(View.VISIBLE);
+        textViewRatingKp.setText(itemFilmInfo.getRatingKinopoisk() + " КП");
+        textViewVoteCountKp.setText(itemFilmInfo.getRatingKinopoiskVoteCount() + " оценок");
+        StringBuilder countries = new StringBuilder();
+        for (int i = 0; i < itemFilmInfo.getCountries().size(); i++) {
+            countries.append(itemFilmInfo.getCountries().get(i).getCountry());
+            if (i != itemFilmInfo.getCountries().size() - 1) countries.append(", ");
+        }
+        textViewCountries.setText(countries);
 
 
         // DESCRIPTION
@@ -550,6 +903,13 @@ public class FilmFragment extends Fragment implements Vibix.ConnectionVibix {
             linearLayoutContent.addView(layout_film_files);
         }
 
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.popup_menu_film, menu);
+        menu.removeItem(menu.getItem(0).getItemId());
     }
 
 

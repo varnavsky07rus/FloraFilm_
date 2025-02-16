@@ -210,11 +210,11 @@ public class CategoryListFilmFragment extends Fragment implements KinopoiskAPI.R
         if (adapter == null) {
             if (collection.getItems().isEmpty()) {
                 rvCategory.setLayoutManager(new GridLayoutManager(getContext(), 1, LinearLayoutManager.VERTICAL, false));
-                adapter = new UniversalRecyclerAdapter(getLayoutInflater(), utils, this.collection, UniversalRecyclerAdapter.TYPE_NULL_DATA);
+                adapter = new UniversalRecyclerAdapter(rvCategory, getLayoutInflater(), utils, this.collection, UniversalRecyclerAdapter.TYPE_NULL_DATA);
                 rvCategory.setAdapter(adapter);
                 return;
             }
-            adapter = new UniversalRecyclerAdapter(getLayoutInflater(), utils, this.collection, UniversalRecyclerAdapter.TYPE_FULL_WIDTH);
+            adapter = new UniversalRecyclerAdapter(rvCategory, getLayoutInflater(), utils, this.collection, UniversalRecyclerAdapter.TYPE_FULL_WIDTH);
             rvCategory.setAdapter(adapter);
         } else {
             adapter.setCollection(collection);

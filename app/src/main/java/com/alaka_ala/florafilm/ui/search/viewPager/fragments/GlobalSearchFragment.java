@@ -231,11 +231,11 @@ public class GlobalSearchFragment extends Fragment implements SearchFragment.Sea
         this.collection = collection;
         if (this.collection.getItems().isEmpty()) {
             rvGlobal.setLayoutManager(new GridLayoutManager(getContext(), 1, RecyclerView.VERTICAL, false));
-            rvGlobal.setAdapter(adapter = new UniversalRecyclerAdapter(getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_NULL_DATA));
+            rvGlobal.setAdapter(adapter = new UniversalRecyclerAdapter(rvGlobal, getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_NULL_DATA));
             return;
         }
         rvGlobal.setLayoutManager(new GridLayoutManager(getContext(), 3, RecyclerView.VERTICAL, false));
-        rvGlobal.setAdapter(adapter = new UniversalRecyclerAdapter(getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_FULL_WIDTH));
+        rvGlobal.setAdapter(adapter = new UniversalRecyclerAdapter(rvGlobal, getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_FULL_WIDTH));
     }
 
 
@@ -246,15 +246,15 @@ public class GlobalSearchFragment extends Fragment implements SearchFragment.Sea
         SearchFragment.setSearchListenerResult(this);
         if (adapter == null || collection == null) {
             rvGlobal.setLayoutManager(new GridLayoutManager(getContext(), 1, RecyclerView.VERTICAL, false));
-            rvGlobal.setAdapter(adapter = new UniversalRecyclerAdapter(getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_NULL_DATA));
+            rvGlobal.setAdapter(adapter = new UniversalRecyclerAdapter(rvGlobal, getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_NULL_DATA));
         } else {
             if (collection.getItems().isEmpty()) {
                 rvGlobal.setLayoutManager(new GridLayoutManager(getContext(), 1, RecyclerView.VERTICAL, false));
-                rvGlobal.setAdapter(adapter = new UniversalRecyclerAdapter(getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_NULL_DATA));
+                rvGlobal.setAdapter(adapter = new UniversalRecyclerAdapter(rvGlobal, getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_NULL_DATA));
             } else {
                 if (rvGlobal.getAdapter() == null) {
                     rvGlobal.setLayoutManager(new GridLayoutManager(getContext(), 3, RecyclerView.VERTICAL, false));
-                    rvGlobal.setAdapter(adapter = new UniversalRecyclerAdapter(getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_FULL_WIDTH));
+                    rvGlobal.setAdapter(adapter = new UniversalRecyclerAdapter(rvGlobal, getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_FULL_WIDTH));
                 } else {
                     rvGlobal.setLayoutManager(new GridLayoutManager(getContext(), 3, RecyclerView.VERTICAL, false));
                     adapter.notifyDataSetChanged();

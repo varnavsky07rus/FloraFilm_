@@ -982,7 +982,7 @@ public class KinopoiskAPI {
                 if (spouse.has("relation")) {
                     relationSpouse = spouse.getString("relation");
                 }
-                StaffSpouseItem staffSpouseItem = new StaffSpouseItem(String.valueOf(personIdSpouse), webUrlSpouse, nameSpouse, sexSpouse);
+                StaffSpouseItem staffSpouseItem = new StaffSpouseItem(personIdSpouse, webUrlSpouse, nameSpouse, sexSpouse);
                 spouses.add(staffSpouseItem);
             }
         }

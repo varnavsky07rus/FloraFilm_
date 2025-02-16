@@ -70,7 +70,7 @@ public class VKVideo {
                 return false;
             }
         });
-        String url = DEF_HOST_API + METHOD_VIDEO_GET + "?owner_id=" + owner_id  + "&offset" + offset +  "&access_token=" + ACCESS_TOKEN + "&v=" + VERSION_API;
+        String url = DEF_HOST_API + METHOD_VIDEO_GET + "?owner_id=" + owner_id + "&offset" + offset + "&access_token=" + ACCESS_TOKEN + "&v=" + VERSION_API;
         OkHttpClient okHttpClient = new OkHttpClient();
         Request.Builder req = new Request.Builder();
         req.url(url);
@@ -117,7 +117,6 @@ public class VKVideo {
                 }
             }
         });
-
     }
 
     public interface GetAllVideosGroupCallback {
@@ -126,6 +125,89 @@ public class VKVideo {
         void onError(Exception e);
     }
 
+
+    /**
+     * Идентификаторы в формате {owner_id}_{video_id},
+     * перечисленные через запятую. Идентификатор сообщества должен начинаться со знака - (минус)
+     * Пример: -166562603_456239104,743784474_456239017.
+     * Некоторые видеозаписи закрыты приватностью и не могут
+     * быть получены без ключа доступа. В этом случае отправьте идентификатор в формате {owner_id}_{video_id}_{access_key}.
+     *
+     * @-Пример: 1_129207899_220df2876123d3542f, 6492_135055734_e0a9bcc31144f67fbd
+     * @-Примечание. Ключ доступа возвращается вместе с остальными данными видео в методах, которые возвращают закрытые приватностью видео, доступные в этом контексте. Например, это поле есть у видео, возвращаемых методом messages.getHistory.
+     */
+    public void getVideo(String videos, GetVideoCallback gvc) {
+        Handler handler = new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(@NonNull Message msg) {
+                Bundle bundle = msg.getData();
+                boolean ok = bundle.getBoolean("ok", false);
+                if (ok) {
+                    ArrayList<VideoItem> videos = (ArrayList<VideoItem>) bundle.getSerializable("videos");
+                    gvc.onSuccess(videos);
+                } else {
+                    gvc.onError("Ошибка получения видео");
+                }
+                return false;
+            }
+        });
+        String url = DEF_HOST_API + METHOD_VIDEO_GET + "?videos=" + videos + "&access_token=" + ACCESS_TOKEN + "&v=" + VERSION_API;
+        OkHttpClient okHttpClient = new OkHttpClient();
+        Request.Builder req = new Request.Builder();
+        req.url(url);
+        req.addHeader("User-Agent", DEF_USER_AGENT);
+        req.addHeader("Accept-Language", "ru,en;q=0.9");
+        okHttpClient.newCall(req.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Bundle bundle = new Bundle();
+                bundle.putBoolean("ok", false);
+                bundle.putSerializable("videos", null);
+                Message msg = new Message();
+                msg.setData(bundle);
+                handler.sendMessage(msg);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                assert response.body() != null;
+                String body = response.body().string();
+                if (response.isSuccessful()) {
+                    if (JsonParser.parseString(body).isJsonObject()) {
+                        try {
+                            JSONObject jsonBody = new JSONObject(body);
+                            jsonBody = jsonBody.getJSONObject("response");
+                            JSONArray items = jsonBody.getJSONArray("items");
+                            ArrayList<VideoItem> videos = getVideoItems(items);
+
+                            Bundle bundle = new Bundle();
+                            bundle.putBoolean("ok", true);
+                            bundle.putSerializable("videos", videos);
+                            Message msg = new Message();
+                            msg.setData(bundle);
+                            handler.sendMessage(msg);
+
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            onFailure(call, new IOException("Ошибка создания объекта JSONObject: " + e.getMessage()));
+                        }
+                    }
+                } else {
+                    onFailure(call, new IOException("Ошибка выполнения запроса, ответ сервера: " + body));
+                }
+            }
+        });
+    }
+
+    public interface GetVideoCallback {
+        void onSuccess(ArrayList<VideoItem> videos);
+
+        void onError(String e);
+
+        default void finish() {
+        }
+    }
 
 
     /**
@@ -197,8 +279,8 @@ public class VKVideo {
     }
 
 
-
     private static final Map<Integer, GroupItem> groupes = new HashMap<>();
+
     // Получение плейлистов группы (если открыты)
     public void getAlbums(int owner_id, int offset, GetAlbumsCallback callback) {
 
@@ -346,14 +428,6 @@ public class VKVideo {
 
     }
 
-
-
-    public interface GetVideosByGroupIdCallback {
-        void onSuccess(ArrayList<VideoItem> videos);
-
-        void onError(Exception e);
-    }
-
     private static @NonNull ArrayList<VideoItem> getVideoItems(JSONArray items) throws JSONException {
         ArrayList<VideoItem> videos = new ArrayList<>();
         for (int i = 0; i < items.length(); i++) {
@@ -488,9 +562,106 @@ public class VKVideo {
 
         void onError(String error);
 
-        default void finish(){}
+        default void finish() {
+        }
     }
 
+    // Получение конкретного Альбома (Плейлиста)
+    public void getAlbum(int owner_id, int album_id, int offset, GetAlbumCallback callback) {
+        Handler handler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
+            @Override
+            public boolean handleMessage(@NonNull Message msg) {
+                Bundle bundle = msg.getData();
+                boolean ok = bundle.getBoolean("ok", false);
+                if (ok) {
+                    PlaylistGroupItem playlistGroupItem = (PlaylistGroupItem) bundle.getSerializable("playlist");
+                    callback.onSuccess(playlistGroupItem);
+                    callback.finish();
+                } else {
+                    String error = bundle.getString("error", "");
+                    callback.onError(error);
+                }
+                return false;
+            }
+        });
+        int count = 100;
+        int extended = 1;
+        String url = DEF_HOST_API + METHOD_VIDEO_GET_ALBUM_BY_ID + "?owner_id=" + owner_id + "&album_id=" + album_id + "&extended=" + extended + "&count=" + count + "&offset=" + offset + "&access_token=" + ACCESS_TOKEN + "&v=" + VERSION_API;
+        OkHttpClient okHttpClient = new OkHttpClient();
+        Request.Builder req = new Request.Builder();
+        req.url(url);
+        req.addHeader("User-Agent", DEF_USER_AGENT);
+        req.addHeader("Accept-Language", "ru,en;q=0.9");
+        okHttpClient.newCall(req.build()).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                sendHandlerError(e, handler);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String body = response.body().string();
+                if (response.isSuccessful()) {
+                    if (JsonParser.parseString(body).isJsonObject()) {
+                        try {
+                            JSONObject jsonBody = new JSONObject(body);
+                            jsonBody = jsonBody.getJSONObject("response");
+
+                            PlaylistGroupItem.Builder builder = new PlaylistGroupItem.Builder();
+                            builder.setCount(jsonBody.has("count") ? jsonBody.getInt("count") : 0);
+                            builder.setUpdatedTime(jsonBody.has("updated_time") ? jsonBody.getInt("updated_time") : 0);
+                            builder.setId(jsonBody.has("id") ? jsonBody.getInt("id") : 0);
+                            builder.setOwnerId(jsonBody.has("owner_id") ? jsonBody.getInt("owner_id") : 0);
+                            builder.setTitle(jsonBody.has("title") ? jsonBody.getString("title") : "");
+                            // Парсинг изображений
+                            ArrayList<VideoItem.Image> images = new ArrayList<>();
+                            JSONArray imagesJson = jsonBody.has("image") ? jsonBody.getJSONArray("image") : new JSONArray();
+                            for (int j = 0; j < imagesJson.length(); j++) {
+                                JSONObject image = imagesJson.getJSONObject(j);
+                                VideoItem.Image.Builder bImage = new VideoItem.Image.Builder();
+                                bImage.setUrl(image.has("url") ? image.getString("url") : "");
+                                bImage.setHeight(image.has("height") ? image.getInt("height") : 0);
+                                bImage.setWidth(image.has("width") ? image.getInt("width") : 0);
+                                images.add(bImage.build());
+                            }
+                            builder.setImages(images);
+                            builder.setIsSubscribed(jsonBody.has("is_subscribed") && jsonBody.getBoolean("is_subscribed"));
+                            builder.setCanView(jsonBody.has("can_view") ? jsonBody.getInt("can_view") : 0);
+                            builder.setFirstVideo_id(jsonBody.has("first_video_id") ? jsonBody.getString("first_video_id") : "");
+                            builder.setCanSubscribe(jsonBody.has("can_subscribe") ? jsonBody.getInt("can_subscribe") : 0);
+                            builder.setResponseType(jsonBody.has("response_type") ? jsonBody.getString("response_type") : "");
+
+
+                            Bundle bundle = new Bundle();
+                            bundle.putSerializable("playlist", builder.build());
+                            bundle.putBoolean("ok", true);
+                            Message msg = new Message();
+                            msg.setData(bundle);
+                            handler.sendMessage(msg);
+
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            onFailure(call, new IOException("Ошибка создания объекта JSONObject: " + e.getMessage()));
+                        }
+                    }
+                } else {
+                    onFailure(call, new IOException("Ошибка получения альбомов. Код ответа: " + response.code()));
+                }
+            }
+        });
+
+
+    }
+
+    public interface GetAlbumCallback {
+        void onSuccess(PlaylistGroupItem playlistGroupItem);
+
+        void onError(String error);
+
+        default void finish() {
+        }
+    }
 
     /**
      * Поиск видео по названию
@@ -832,7 +1003,6 @@ public class VKVideo {
             return userName;
         }
     }
-
 
 
     public static class VideoItem implements Serializable {

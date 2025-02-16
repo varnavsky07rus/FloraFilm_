@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal"
+    android:padding="16dp">
+
+    <com.alaka_ala.florafilm.sys.TimelineView
+        android:id="@+id/timelineView"
+        android:layout_width="40dp"
+        android:layout_height="match_parent"
+        app:color="#41FF0D"
+        app:backgroundTint="#1436AF"
+        />
+
+    <TextView
+        android:id="@+id/updateCommentTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_weight="1"
+        android:text="Комментарий обновления"
+        android:textSize="16sp" /></LinearLayout>

@@ -10,9 +10,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StringDef;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alaka_ala.florafilm.R;
@@ -39,7 +41,9 @@ public class UniversalRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.
     }
     private String typeHolder = TYPE_HOLDER_BIG_POSTER;
     private final LayoutInflater layoutInflater;
-    public UniversalRecyclerAdapter(LayoutInflater layoutInflater, UtilsFavoriteAndViewFilm utills, Collection collection, @TypeHolder String typeHolder) {
+    private static RecyclerView rv;
+    public UniversalRecyclerAdapter(RecyclerView rv, LayoutInflater layoutInflater, UtilsFavoriteAndViewFilm utills, Collection collection, @TypeHolder String typeHolder) {
+        UniversalRecyclerAdapter.rv = rv;
         this.layoutInflater = layoutInflater;
         utilsFavoriteAndViewFilm = utills;
         this.collection = collection;
@@ -233,13 +237,13 @@ public class UniversalRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.
         public ImageView getImageViewIsViewedBig() {
             return imageViewIsViewedBig;
         }
-
+        private final CardView cardViewMoreOptionsVkVideo;
         private final ImageView imageViewPosterBig;
         private final ImageView imageViewSaveToFavoriteBig;
         private final ImageView imageViewIsViewedBig;
-
         public ViewHolderBigPoster(@NonNull View itemView) {
             super(itemView);
+            cardViewMoreOptionsVkVideo = itemView.findViewById(R.id.cardViewMoreOptionsVkVideo);
             imageViewPosterBig = itemView.findViewById(R.id.imageViewPosterBig);
             imageViewSaveToFavoriteBig = itemView.findViewById(R.id.imageViewSaveToFavoriteBig);
             imageViewIsViewedBig = itemView.findViewById(R.id.imageViewIsViewedBig);
@@ -311,11 +315,9 @@ public class UniversalRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.
         public ViewHolderNullData(@NonNull View itemView) {
             super(itemView);
             textViewResultText = itemView.findViewById(R.id.textViewResultText);
+
         }
     }
-
-
-
 
 
 }

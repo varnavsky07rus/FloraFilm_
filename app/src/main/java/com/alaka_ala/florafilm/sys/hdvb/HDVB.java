@@ -28,9 +28,11 @@ import java.net.URL;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -44,7 +46,7 @@ import okhttp3.Response;
 public class HDVB {
     public static final String TYPE_CONTENT_FILM = "movie";
     public static final String TYPE_CONTENT_SERIAL = "serial";
-    private final Map<String, String> headers = new HashMap<>();
+    private static final Map<String, String> headers = new HashMap<>();
     private final String API_KEY;
 
     private static String X_CSRF_TOKEN = "AALlPbfua1Kxj1K3Ohk$rlmBM-zm3e9ENIgU-sLEuU6K5OWgpdwEG8DyEC7FLwvV";
@@ -353,17 +355,47 @@ public class HDVB {
         return new JSONArray();
     }
 
-    // Получение ссылки на файл .m3u8 для сериала
-    public void getFileSerial(String episodeToken) {
+    private static final Queue<String> requestQueue = new LinkedList<>();
+    private static boolean isProcessing = false;
+    public static void getFileSerial(String episodeToken, CallbackSerialGetFile cb) {
+        // Добавляем запрос в очередь
+        requestQueue.add(episodeToken);
 
+        // Если обработка не запущена, запускаем её
+        if (!isProcessing) {
+            processNextRequest(cb);
+        }
+    }
+    // Приватный метод предназначен для последовательного парсинга файлов на серии сериалов,
+    // то есть можно в цикле вызывать несколько раз данный метод,
+    // но выполняться они будут поочередно,
+    // последовательно после завершения предыдущего.
+    private static void processNextRequest(CallbackSerialGetFile cb) {
+        if (requestQueue.isEmpty()) {
+            isProcessing = false;
+            cb.finish(); // Вызываем finish(), когда все запросы выполнены
+            return;
+        }
+
+        isProcessing = true;
+        String episodeToken = requestQueue.poll();
         String urlM3u8 = "https://" + HREF + "/playlist/" + episodeToken + ".txt";
         createMapHeaders();
+
         Handler handler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
             @Override
             public boolean handleMessage(@NonNull Message msg) {
                 Bundle bundle = msg.getData();
-                String m3u8 = bundle.getString("file", "");
+                if (bundle.getBoolean("ok")) {
+                    String m3u8 = bundle.getString("file", "");
+                    cb.success(m3u8);
+                } else {
+                    String error = bundle.getString("error", "");
+                    cb.error(error);
+                }
 
+                // После завершения текущего запроса, обрабатываем следующий
+                processNextRequest(cb);
                 return false;
             }
         });
@@ -386,22 +418,40 @@ public class HDVB {
                         BufferedReader bufferedReader;
                         bufferedReader = new BufferedReader(new InputStreamReader(myURLConnection.getInputStream()));
                         String urlsM3u8 = bufferedReader.lines().collect(Collectors.joining(System.lineSeparator()));
-                        sendMessage(urlsM3u8);
+                        sendMessage(urlsM3u8, true, "");
                     }
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    e.printStackTrace();
+                    sendMessage("", false, e.getMessage());
                 }
             }
 
-            private void sendMessage(String urlsM3u8) {
+            private void sendMessage(String urlsM3u8, boolean isOk, String error) {
                 Bundle bundle = new Bundle();
-                bundle.putString("file", urlsM3u8);
-                Message msg = new Message();
-                msg.setData(bundle);
-                handler.sendMessage(msg);
+                if (isOk) {
+                    bundle.putBoolean("ok", true);
+                    bundle.putString("file", urlsM3u8);
+                    bundle.putString("error", "");
+                    Message msg = new Message();
+                    msg.setData(bundle);
+                    handler.sendMessage(msg);
+                } else {
+                    bundle.putBoolean("ok", false);
+                    bundle.putString("file", "");
+                    bundle.putString("error", error);
+                    Message msg = new Message();
+                    msg.setData(bundle);
+                    handler.sendMessage(msg);
+                }
             }
         });
         thread.start();
+    }
+
+    public interface CallbackSerialGetFile {
+        void success(String url);
+        void error(String error);
+        void finish();
     }
 
 
@@ -483,7 +533,7 @@ public class HDVB {
     }
 
     // Создание заголовков
-    private void createMapHeaders() {
+    private static void createMapHeaders() {
         final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
         final String ACCEPT = "*/*";
         final String ACCEPT_ENCODING = "text, deflate, br";

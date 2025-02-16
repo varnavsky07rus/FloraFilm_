@@ -15,6 +15,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.alaka_ala.florafilm.R;
 import com.alaka_ala.florafilm.databinding.ActivityExoBinding;
+import com.alaka_ala.florafilm.sys.hdvb.HDVB;
 import com.alaka_ala.florafilm.sys.vibix.Vibix;
 import com.alaka_ala.florafilm.ui.player.exo.models.EPData;
 import com.alaka_ala.florafilm.ui.vk.LoginVkActivity;
@@ -64,7 +65,6 @@ public class ExoActivity extends AppCompatActivity {
         getExtras();
 
 
-
         if (TYPE_CONTENT.equals("FILM")) {
             String currentUrl = film.getTranslations().get(indexTranslation).getVideoData().get(indexQuality).getValue();
             if (currentUrl.isEmpty()) {
@@ -90,7 +90,7 @@ public class ExoActivity extends AppCompatActivity {
         return currentUrls;
     }
 
-    private void  preparePlayer() {
+    private void preparePlayer() {
 
         // Создаем экземпляр DefaultHttpDataSource.Factory
         DefaultHttpDataSource.Factory httpDataSourceFactory = new DefaultHttpDataSource.Factory();
@@ -133,19 +133,43 @@ public class ExoActivity extends AppCompatActivity {
 
     private void initializePlayer(ArrayList<String> videoUrls) {
         if (videoUrls.isEmpty()) {
-            Snackbar.make(binding.getRoot(), "Ошибка данных", Snackbar.LENGTH_SHORT).show();
+            new MaterialAlertDialogBuilder(this).setTitle("Ошибка").setMessage("Ссылкии на файлы отсутствуют").show();
         }
         if (player == null) {
             preparePlayer();
         }
         ArrayList<MediaItem> mediaItems = new ArrayList<>();
         for (int i = 0; i < videoUrls.size(); i++) {
-            MediaItem mediaItem = MediaItem.fromUri(videoUrls.get(i));
-            mediaItems.add(mediaItem);
+            if (videoUrls.get(i).startsWith("https") || videoUrls.get(i).startsWith("http")) {
+                MediaItem mediaItem = MediaItem.fromUri(videoUrls.get(i));
+                mediaItems.add(mediaItem);
+            } else if (videoUrls.get(i).startsWith("~")) {
+                HDVB.getFileSerial(videoUrls.get(i), new HDVB.CallbackSerialGetFile() {
+                    @Override
+                    public void success(String url) {
+                        MediaItem mediaItem = MediaItem.fromUri(url);
+                        mediaItems.add(mediaItem);
+                    }
+
+                    @Override
+                    public void error(String error) {
+
+                    }
+
+                    @Override
+                    public void finish() {
+                        player.setMediaItems(mediaItems, indexEpisode, 0);
+                        player.prepare();
+                        player.play();
+                    }
+                });
+            }
         }
-        player.setMediaItems(mediaItems, indexEpisode, 0);
-        player.prepare();
-        player.play();
+        if (!player.isPlaying()) {
+            player.setMediaItems(mediaItems, indexEpisode, 0);
+            player.prepare();
+            player.play();
+        }
     }
 
     private void getExtras() {

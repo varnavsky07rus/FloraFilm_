@@ -12,8 +12,14 @@ navigationUi = "2.8.5"
 annotation = "1.9.1"
 lifecycleLivedataKtx = "2.8.7"
 lifecycleViewmodelKtx = "2.8.7"
+markwon = "4.6.2"
+markwonExtStrikethrough = "4.6.2"
+markwonExtTables = "4.6.2"
+markwonExtTasklist = "4.6.2"
+syntaxHighlight = "4.6.2"
 
 [libraries]
+glide = { module = "io.noties.markwon:glide", version.ref = "syntaxHighlight" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -26,6 +32,11 @@ navigation-ui = { group = "androidx.navigation", name = "navigation-ui", version
 annotation = { group = "androidx.annotation", name = "annotation", version.ref = "annotation" }
 lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycleLivedataKtx" }
 lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+markwon = { group = "io.noties", name = "markwon", version.ref = "markwon" }
+markwon-ext-strikethrough = { group = "io.noties", name = "markwon-ext-strikethrough", version.ref = "markwonExtStrikethrough" }
+markwon-ext-tables = { group = "io.noties", name = "markwon-ext-tables", version.ref = "markwonExtTables" }
+markwon-ext-tasklist = { group = "io.noties", name = "markwon-ext-tasklist", version.ref = "markwonExtTasklist" }
+syntax-highlight = { module = "io.noties.markwon:syntax-highlight", version.ref = "syntaxHighlight" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -33,6 +33,29 @@
                     android:layout_gravity="center"
                     android:scaleType="centerCrop"
                     app:srcCompat="@drawable/vk" />
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|end"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="8dp"
+                    app:cardBackgroundColor="#99595959"
+                    app:cardElevation="0dp">
+
+                    <TextView
+                        android:id="@+id/textViewDurationContentVk"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginEnd="4dp"
+                        android:layout_marginBottom="4dp"
+                        android:textColor="@color/white"
+                        android:textSize="10sp"
+                        tools:text="32:15" />
+                </androidx.cardview.widget.CardView>
+
             </androidx.cardview.widget.CardView>
 
             <LinearLayout

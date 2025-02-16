@@ -206,10 +206,10 @@ public class ViewedSearchFragment extends Fragment implements SearchFragment.Sea
         this.collection = collection;
         if (this.collection.getItems().isEmpty()) {
             rvViewedSearch.setLayoutManager(new GridLayoutManager(getContext(), 1, RecyclerView.VERTICAL, false));
-            rvViewedSearch.setAdapter(adapter = new UniversalRecyclerAdapter(getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_NULL_DATA));
+            rvViewedSearch.setAdapter(adapter = new UniversalRecyclerAdapter(rvViewedSearch, getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_NULL_DATA));
             return;
         }
-        rvViewedSearch.setAdapter(adapter = new UniversalRecyclerAdapter(getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_FULL_WIDTH));
+        rvViewedSearch.setAdapter(adapter = new UniversalRecyclerAdapter(rvViewedSearch, getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_FULL_WIDTH));
         rvViewedSearch.setLayoutManager(new GridLayoutManager(getContext(), 3, RecyclerView.VERTICAL, false));
     }
 
@@ -222,11 +222,11 @@ public class ViewedSearchFragment extends Fragment implements SearchFragment.Sea
         if (adapter == null) {
             if (collection.getItems().isEmpty()) {
                 rvViewedSearch.setLayoutManager(new GridLayoutManager(getContext(), 1, RecyclerView.VERTICAL, false));
-                rvViewedSearch.setAdapter(adapter = new UniversalRecyclerAdapter(getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_NULL_DATA));
+                rvViewedSearch.setAdapter(adapter = new UniversalRecyclerAdapter(rvViewedSearch, getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_NULL_DATA));
                 return;
             }
             rvViewedSearch.setLayoutManager(new GridLayoutManager(getContext(), 3, RecyclerView.VERTICAL, false));
-            rvViewedSearch.setAdapter(adapter = new UniversalRecyclerAdapter(getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_FULL_WIDTH));
+            rvViewedSearch.setAdapter(adapter = new UniversalRecyclerAdapter(rvViewedSearch, getLayoutInflater(), utils, collection, UniversalRecyclerAdapter.TYPE_FULL_WIDTH));
         } else  {
             adapter.notifyDataSetChanged();
         }

@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
@@ -65,6 +67,11 @@ public class PlaylistGroupFragment extends Fragment implements SwipeRefreshLayou
             playlistGroupItem = (VKVideo.PlaylistGroupItem) getArguments().getSerializable("playlist");
         }
 
+        // Получаем ActionBar из Activity
+        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(playlistGroupItem.getTitle());
+        }
         buttonPlayAll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -78,7 +85,8 @@ public class PlaylistGroupFragment extends Fragment implements SwipeRefreshLayou
                 seasonBuilder.setTitle("Плейлист: " + playlistGroupItem.getTitle());
                 // Создаем список серий и создаем их в цикле
                 ArrayList<EPData.Serial.Episode> episodesList = new ArrayList<>();
-                for (int i = 0; i < videos.size(); i++) {
+                int sze = Math.min(videos.size(), 100);
+                for (int i = 0; i < sze; i++) {
                     EPData.Serial.Episode.Builder episodeBuilder = new EPData.Serial.Episode.Builder();
                     // Создаем список переводов но перевод всегда один
                     ArrayList<EPData.Serial.Translations> translationsList = new ArrayList<>();
@@ -111,7 +119,6 @@ public class PlaylistGroupFragment extends Fragment implements SwipeRefreshLayou
                 startActivity(intent);
             }
         });
-
 
         if (playlistGroupItem == null) return binding.getRoot();
         groupPlaylistVideoCreate();
@@ -236,11 +243,11 @@ public class PlaylistGroupFragment extends Fragment implements SwipeRefreshLayou
             }
         });
         isUpdate = true;
-        vkVideo.getVideosGroup(String.valueOf(playlistGroupItem.getOwnerId()), String.valueOf(playlistGroupItem.getId()), videos.size(), new VKVideo.GetAllVideosGroupCallback() {
+        vkVideo.getVideosGroup(String.valueOf(playlistGroupItem.getOwnerId()), String.valueOf(playlistGroupItem.getId()), 0, new VKVideo.GetAllVideosGroupCallback() {
             @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onSuccess(ArrayList<VKVideo.VideoItem> vds) {
-                videos.addAll(videos.size(), vds);
+                videos = vds;
                 handler.sendEmptyMessage(1);
             }
 
@@ -250,7 +257,6 @@ public class PlaylistGroupFragment extends Fragment implements SwipeRefreshLayou
             }
         });
     }
-
 
     private static class AdapterVideos extends RecyclerView.Adapter<AdapterVideos.ViewHolder> {
         @NonNull
@@ -268,6 +274,7 @@ public class PlaylistGroupFragment extends Fragment implements SwipeRefreshLayou
             holder.textViewTitleVkVideo.setText(videoItem.getTitle());
             holder.textViewTotalViewsVkVideo.setText(videoItem.getViews() + " просмотров");
             holder.cardViewMoreOptionsVkVideo.setId(position);
+            holder.textViewDurationContentVk.setText(formatDuration(videoItem.getDuration()));
             holder.cardViewMoreOptionsVkVideo.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -285,6 +292,7 @@ public class PlaylistGroupFragment extends Fragment implements SwipeRefreshLayou
             private final ImageView imageViewVkImgPoster;
             private final TextView textViewTitleVkVideo;
             private final TextView textViewTotalViewsVkVideo;
+            private final TextView textViewDurationContentVk;
             private final CardView cardViewMoreOptionsVkVideo;
 
             public ViewHolder(@NonNull View itemView) {
@@ -292,6 +300,7 @@ public class PlaylistGroupFragment extends Fragment implements SwipeRefreshLayou
                 imageViewVkImgPoster = itemView.findViewById(R.id.imageViewVkImgPoster);
                 textViewTitleVkVideo = itemView.findViewById(R.id.textViewTitleVkVideo);
                 textViewTotalViewsVkVideo = itemView.findViewById(R.id.textViewTotalViewsVkVideo);
+                textViewDurationContentVk = itemView.findViewById(R.id.textViewDurationContentVk);
                 cardViewMoreOptionsVkVideo = itemView.findViewById(R.id.cardViewMoreOptionsVkVideo);
             }
         }
@@ -302,4 +311,20 @@ public class PlaylistGroupFragment extends Fragment implements SwipeRefreshLayou
         super.onDestroy();
         videos.clear();
     }
+
+    @SuppressLint("DefaultLocale")
+    public static String formatDuration(int duration) {
+        int hours = duration / 3600;
+        int minutes = (duration % 3600) / 60;
+        int seconds = duration % 60;
+
+        if (hours > 0) {
+            return String.format("%dч %02dм", hours, minutes);
+        } else if (minutes > 0){
+            return String.format("%dм %02d сек", minutes, seconds);
+        } else {
+            return String.format("%d сек", seconds);
+        }
+    }
+
 }

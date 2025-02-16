@@ -32,7 +32,15 @@
         android:id="@+id/settingsAppFragment"
         android:name="com.alaka_ala.florafilm.ui.settings.SettingsAppFragment"
         android:label="Настройки"
-        tools:layout="@layout/fragment_settings_app" />
+        tools:layout="@layout/fragment_settings_app" >
+        <action
+            android:id="@+id/action_settingsAppFragment_to_commitsAppFragment"
+            app:destination="@id/commitsAppFragment"
+            app:enterAnim="@anim/enter_anim_my"
+            app:exitAnim="@anim/exit_anim_my"
+            app:popEnterAnim="@anim/enter_anim_my"
+            app:popExitAnim="@anim/exit_anim_my" />
+    </fragment>
     <fragment
         android:id="@+id/viewedFragment"
         android:name="com.alaka_ala.florafilm.ui.viewed.ViewedFragment"
@@ -73,4 +81,9 @@
         android:name="com.alaka_ala.florafilm.ui.vk.ui.groups.playlist.PlaylistGroupFragment"
         android:label="Плейлист"
         tools:layout="@layout/fragment_playlist_group" />
+    <fragment
+        android:id="@+id/commitsAppFragment"
+        android:name="com.alaka_ala.florafilm.ui.settings.commits_app.CommitsAppFragment"
+        android:label="fragment_commits_app"
+        tools:layout="@layout/fragment_commits_app" />
 </navigation>

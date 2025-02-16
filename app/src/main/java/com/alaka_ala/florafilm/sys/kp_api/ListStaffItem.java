@@ -9,13 +9,13 @@ import java.io.Serializable;
  */
 public class ListStaffItem implements Serializable {
 
-    private int staffId;
-    private String nameRu;
-    private String nameEn;
-    private String description;
-    private String posterUrl;
-    private String professionText;
-    private String professionKey;
+    private final int staffId;
+    private final String nameRu;
+    private final String nameEn;
+    private final String description;
+    private final String posterUrl;
+    private final String professionText;
+    private final String professionKey;
 
     public String getProfessionKey() {
         return professionKey;

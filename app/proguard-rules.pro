@@ -24,3 +24,4 @@
 # This is generated automatically by the Android Gradle plugin.
 -dontwarn org.conscrypt.Conscrypt
 -dontwarn org.conscrypt.OpenSSLProvider
+-dontwarn org.commonmark.ext.gfm.strikethrough.Strikethrough

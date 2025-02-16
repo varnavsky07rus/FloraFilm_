@@ -45,9 +45,9 @@ public class ViewedFragment extends Fragment {
 
         boolean isNullData = collection.getItems().isEmpty();
         if (isNullData) {
-            adapter = new UniversalRecyclerAdapter(getLayoutInflater(), utilsFavoriteAndViewFilm, collection, UniversalRecyclerAdapter.TYPE_NULL_DATA);
+            adapter = new UniversalRecyclerAdapter(rvViewed, getLayoutInflater(), utilsFavoriteAndViewFilm, collection, UniversalRecyclerAdapter.TYPE_NULL_DATA);
         } else {
-            adapter = new UniversalRecyclerAdapter(getLayoutInflater(), utilsFavoriteAndViewFilm, collection, UniversalRecyclerAdapter.TYPE_FULL_WIDTH);
+            adapter = new UniversalRecyclerAdapter(rvViewed, getLayoutInflater(), utilsFavoriteAndViewFilm, collection, UniversalRecyclerAdapter.TYPE_FULL_WIDTH);
         }
 
         if (isNullData) {
